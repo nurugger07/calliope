@@ -35,6 +35,7 @@ defmodule Calliope.Render do
     # get the tag
     tag = cond do
       Regex.match?(@div, tag) -> "div"
+      true -> ""
     end
     tab_count    = (String.split(tabs, @tabs) |> Enum.count) - 1
     self_closing = Enum.member?(@self_closing, tag)
@@ -49,13 +50,22 @@ defmodule Calliope.Render do
   end
 
   def process([]), do: []
-  def process([[full: _, tag: tag, indent: _, content: content, self_closing: _]|t]) do
+  def process([[full: _, tag: tag, indent: indent, content: content, self_closing: _]|t]) when tag == "" do
+    ([tabs(indent), content] |> wrap_newline) ++ process(t)
+  end
+  def process([[full: full, tag: tag, indent: _, content: content, self_closing: _]|t]) do
     # process each node to list of html tags
     ["<#{tag}>#{content}"] ++ process(t) ++ ["</#{tag}>"]
+  end
+
+  def wrap_newline(contents), do: ["\n", contents, "\n"]
+
+  def tabs(0), do: []
+  def tabs(count) do
+    (["\t"] ++ tabs(count - 1)) |> Enum.join
   end
 
   def new_node(full, tag, indent, content, self_closing) do
     [ full: full, tag: tag, indent: indent, content: content, self_closing: self_closing ]
   end
-
 end
