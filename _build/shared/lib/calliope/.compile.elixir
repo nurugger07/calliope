@@ -1,2 +1,2 @@
 /Users/dev/hashrocket/calliope/_build/shared/lib/calliope/ebin/Elixir.Calliope.beam	Elixir.Calliope	lib/calliope.ex	Elixir.Calliope	elixir_module
-/Users/dev/hashrocket/calliope/_build/shared/lib/calliope/ebin/Elixir.Calliope.Render.beam	Elixir.Calliope.Render	lib/calliope/render.ex	Elixir.Calliope.Render	Elixir.Enum	Elixir.Kernel	Elixir.Kernel.Typespec	Elixir.Module	Elixir.Record	Elixir.Regex	Elixir.String	elixir_def	elixir_module	elixir_quote	erlang
+/Users/dev/hashrocket/calliope/_build/shared/lib/calliope/ebin/Elixir.Calliope.Render.beam	Elixir.Calliope.Render	lib/calliope/render.ex	Elixir.Calliope.Render	Elixir.Enum	Elixir.Kernel	Elixir.Module	Elixir.Regex	Elixir.String	Elixir.String.Chars	elixir_def	elixir_module	erlang
