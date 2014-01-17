@@ -20,16 +20,11 @@ defmodule CalliopeParserTest do
     ]
 
   test :parse_line do
-    assert parsed_tokens(0)  == parse_line tokens(0)
-    assert parsed_tokens(1)  == parse_line(tokens(1))
-    assert parsed_tokens(2)  == parse_line(tokens(2))
-    assert parsed_tokens(3)  == parse_line(tokens(3))
-    assert parsed_tokens(4)  == parse_line(tokens(4))
-  end
-
-  test :merge_into_classes do
-    list = [ classes: "class1" ]
-    assert [ classes: ["class1", "class2"] ] == merge_into(:classes, list, "class2")
+    assert parsed_tokens(0) == parse_line tokens(0)
+    assert parsed_tokens(1) == parse_line(tokens(1))
+    assert parsed_tokens(2) == parse_line(tokens(2))
+    assert parsed_tokens(3) == parse_line(tokens(3))
+    assert parsed_tokens(4) == parse_line(tokens(4))
   end
 
   defp tokens(n), do: line(@tokens, n)

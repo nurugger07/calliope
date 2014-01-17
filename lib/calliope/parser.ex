@@ -24,10 +24,10 @@ defmodule Calliope.Parser do
     parse_line(t, acc)
   end
 
-  def merge_into(key, list, value) do
+  defp merge_into(key, list, value) do
     value = cond do
       list[key] -> [list[key]] ++ [value]
-      true -> [value]
+      true      -> [value]
     end
     Keyword.put(list, key, value) |> Enum.reverse
   end
