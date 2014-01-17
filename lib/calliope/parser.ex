@@ -24,6 +24,24 @@ defmodule Calliope.Parser do
     parse_line(t, acc)
   end
 
+  def build_tree([]), do: []
+  def build_tree([h|t]) do
+    {rem, children} = pop_children(h, t)
+    [h ++ build_children(children)] ++ build_tree(rem)
+  end
+
+  defp build_children([]), do: []
+  defp build_children(l), do: [children: build_tree(l)]
+
+  def pop_children(parent, list) do
+    { children, rem }  = Enum.split_while(list, &bigger_indentation?(&1, parent))
+    { rem, children }
+  end
+
+  defp bigger_indentation?(token1, token2) do
+    Keyword.get(token1, :indent, 0) > Keyword.get(token2, :indent, 0)
+  end
+
   defp merge_into(key, list, value) do
     value = cond do
       list[key] -> [list[key]] ++ [value]
