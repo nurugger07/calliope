@@ -19,12 +19,38 @@ defmodule CalliopeParserTest do
       [ indent: 2, content: "Welcome to Calliope" ]
     ]
 
+  @nested_tree [
+      [ tag: "section", classes: ["container"], children: [
+          [ tag: "h1", indent: 1, content: "Calliope" ],
+          [ tag: "h2", indent: 1, content: "An Elixir Haml Parser"],
+          [ id: "main", indent: 1, classes: ["content"], children: [
+              [ indent: 2, content: "Welcome to Calliope" ]
+            ]
+          ],
+        ]
+      ],
+    ]
+
+  @children Keyword.fetch!(Enum.first(@nested_tree), :children)
+
   test :parse_line do
     assert parsed_tokens(0) == parsed_line_tokens(tokens(0))
     assert parsed_tokens(1) == parsed_line_tokens(tokens(1))
     assert parsed_tokens(2) == parsed_line_tokens(tokens(2))
     assert parsed_tokens(3) == parsed_line_tokens(tokens(3))
     assert parsed_tokens(4) == parsed_line_tokens(tokens(4))
+  end
+
+  # test :build_tree do
+  #   assert @nested_tree == build_tree @parsed_tokens
+  # end
+
+  # test :process_children do
+  #   assert { [], @children } == process_children(@parsed_tokens)
+  # end
+
+  test :pop_children do
+    assert { [[indent: 0], [indent: 0]], [[ indent: 1]] } == pop_children([indent: 0], [[ indent: 1], [indent: 0], [indent: 0]])
   end
 
   defp tokens(n), do: line(@tokens, n)
