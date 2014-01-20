@@ -25,27 +25,22 @@ defmodule Calliope.Parser do
   end
 
   def build_tree([]), do: []
-  def build_tree([h|t], parent_indent//0) do
-    # indent = current_level(h)
-    # { t, children } = cond do
-    #   parent_indent < indent -> process_children(t, parent_indent)
-    # end
-    # [ h ++ [ children: children] ] ++ build_tree(t, indent)
+  def build_tree([h|t]) do
+    {rem, children} = pop_children(h, t)
+    [h ++ build_children(children)] ++ build_tree(rem)
   end
 
-  # def process_children([]), do: { [], acc }
-  # def process_children([h|t]) do
-  #   { t, children } = pop_children(h, t)
-
-  #   [h ++ [children: children]] ++ process_children(t)
-  # end
+  defp build_children([]), do: []
+  defp build_children(l), do: [children: build_tree(l)]
 
   def pop_children(parent, list) do
-    { children, rem }  = Enum.split_while(list, fn(l) -> Keyword.get(l, :indent, 0) > parent[:indent] end)
+    { children, rem }  = Enum.split_while(list, &bigger_indentation?(&1, parent))
     { rem, children }
   end
 
-  defp current_level(h), do: Keyword.get(h, :indent, 0)
+  defp bigger_indentation?(token1, token2) do
+    Keyword.get(token1, :indent, 0) > Keyword.get(token2, :indent, 0)
+  end
 
   defp merge_into(key, list, value) do
     value = cond do
