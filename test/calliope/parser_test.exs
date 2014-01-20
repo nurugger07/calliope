@@ -14,18 +14,18 @@ defmodule CalliopeParserTest do
 
   @parsed_tokens [
       [ tag: "section", classes: ["container"] ],
-      [ tag: "h1", indent: 1, content: "Calliope" ],
-      [ tag: "h2", indent: 1, content: "An Elixir Haml Parser" ],
-      [ id: "main", indent: 1, classes: ["content"] ],
+      [ indent: 1, tag: "h1", content: "Calliope" ],
+      [ indent: 1, tag: "h2", content: "An Elixir Haml Parser" ],
+      [ indent: 1, id: "main", classes: ["content"] ],
       [ indent: 2, content: "Welcome to Calliope" ],
       [ tag: "section", classes: ["container"] ]
     ]
 
   @nested_tree [
       [ tag: "section", classes: ["container"], children: [
-          [ tag: "h1", indent: 1, content: "Calliope" ],
-          [ tag: "h2", indent: 1, content: "An Elixir Haml Parser"],
-          [ id: "main", indent: 1, classes: ["content"], children: [
+          [ indent: 1, tag: "h1", content: "Calliope" ],
+          [ indent: 1, tag: "h2",content: "An Elixir Haml Parser"],
+          [ indent: 1, id: "main", classes: ["content"], children: [
               [ indent: 2, content: "Welcome to Calliope" ]
             ]
           ],
@@ -34,7 +34,16 @@ defmodule CalliopeParserTest do
       [ tag: "section", classes: ["container"] ]
     ]
 
-  @children Keyword.fetch!(List.first(@nested_tree), :children)
+  @children Keyword.fetch!(Enum.first(@nested_tree), :children)
+
+  test :parse do
+    result = parse(@tokens)
+
+    # Count root level
+    assert Enum.count(result) == 2
+    # Count children
+    assert (Enum.count (Enum.first(result))) == 3
+  end
 
   test :parse_line do
     assert parsed_tokens(0) == parsed_line_tokens(tokens(0))
@@ -49,16 +58,12 @@ defmodule CalliopeParserTest do
     assert @nested_tree == build_tree @parsed_tokens
   end
 
-  # test :process_children do
-  #   assert { [], @children } == process_children(@parsed_tokens)
-  # end
-
   test :pop_children do
-    assert { [[indent: 0], [indent: 1]], [[ indent: 1]] } == pop_children([indent: 0], [[ indent: 1], [indent: 0], [indent: 1]])
+    assert { [[indent: 0, tag: "bottom"], [indent: 1, tag: "bottom_child"]], [[ indent: 1, tag: "top_child"]] } == pop_children([indent: 0, tag: "top"], [[ indent: 1, tag: "top_child"], [indent: 0, tag: "bottom"], [indent: 1, tag: "bottom_child"]])
   end
 
   test :pop_children_with_unindented_parent do
-    assert { [[indent: 0]], [[indent: 1]]} == pop_children([],[[indent: 1], [indent: 0]]) 
+    assert { [[indent: 0]], [[indent: 1]]} == pop_children([],[[indent: 1], [indent: 0]])
   end
 
   defp tokens(n), do: line(@tokens, n)

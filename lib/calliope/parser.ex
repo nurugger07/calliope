@@ -7,9 +7,12 @@ defmodule Calliope.Parser do
   @tab      "\t"
 
   def parse([]), do: []
-  def parse([_|t]) do
-    parse(t)
+  def parse(l) do
+    build_tree(parse_lines(l))
   end
+
+  def parse_lines([]), do: []
+  def parse_lines([h|t]), do: [parse_line(h)|parse_lines(t)]
 
   def parse_line([], acc), do: acc
   def parse_line([h|t], acc//[]) do
