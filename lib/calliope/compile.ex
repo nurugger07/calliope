@@ -9,14 +9,12 @@ defmodule Calliope.Compiler do
     open(compile_attributes(h), tag(h)) <> "#{h[:content]}" <> compile(h[:children]) <> close(tag(h)) <> compile(t)
   end
 
-  def open( _, nil, _), do: ""
-  def open(attributes//"", tag_value, indent//[]) do
-    (indent ++ ["<#{tag_value}", "#{attributes}>"]) |> join
-  end
+  def open(_, nil), do: ""
+  def open(attributes, tag_value), do: "<#{tag_value}#{attributes}>"
 
-  def close( nil, _), do: ""
-  def close(tag_value, _) when tag_value in @self_closing, do: ""
-  def close(tag_value, indent//[]), do: (indent ++ ["</#{tag_value}>"]) |> join
+  def close(nil), do: ""
+  def close(tag_value) when tag_value in @self_closing, do: ""
+  def close(tag_value), do: "</#{tag_value}>"
 
   def compile_attributes(list) do
     Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1]))
@@ -25,21 +23,19 @@ defmodule Calliope.Compiler do
   def reject_or_compile_key(_, nil), do: nil
   def reject_or_compile_key(key, value), do: compile_key({ key, value })
 
-  def compile_key({ :classes, value}), do: " class=\"#{join(value, " ")}\""
+  def compile_key({ :classes, value}), do: " class=\"#{Enum.join(value)}\""
   def compile_key({ :id, value }), do: " id=\"#{value}\""
 
   def tag(node) do
     cond do
-      Keyword.has_key?(node, :tag) -> Keyword.get(node, :tag)
-      Keyword.has_key?(node, :id) ||
-        Keyword.has_key?(node, :classes) -> "div"
-      Keyword.has_key?(node, :content) -> nil
+      has_any_key?(node, [:tag]) -> Keyword.get(node, :tag)
+      has_any_key?(node, [:id, :classes]) -> "div"
+      has_any_key?(node, [:content]) -> nil
       true -> false #raise an error
     end
   end
 
-  def indents(0, tabs), do: [Enum.join(tabs)]
-  def indents(n, tabs//[]), do: indents(n - 1, tabs ++ ["\t"])
+  defp has_any_key?(_, []), do: false
+  defp has_any_key?(list, [h|t]), do: Keyword.has_key?(list, h) || has_any_key?(list, t)
 
-  defp join(list, sep//""), do: Enum.join(list, sep)
 end

@@ -29,13 +29,6 @@ defmodule CalliopeCompilerTest do
     <section class="container"></section>
   }, "")
 
-  test :indents do
-    assert ["\t\t\t"] == indents(3)
-    assert ["\t\t"] == indents(2)
-    assert ["\t"] == indents(1)
-    assert [""] == indents(0)
-  end
-
   test :compile_attributes do
     assert " id=\"foo\" class=\"bar\"" ==  compile_attributes([ id: "foo", classes: ["bar"] ])
     assert " class=\"bar\"" ==  compile_attributes([ classes: ["bar"] ])
@@ -66,7 +59,6 @@ defmodule CalliopeCompilerTest do
 
   test :close do
     assert "</div>" == close("div")
-    assert "\t\t</div>" == close("div", ["\t\t"])
     assert "</section>" == close("section")
     assert "" == close(nil)
 
