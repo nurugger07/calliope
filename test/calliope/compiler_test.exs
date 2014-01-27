@@ -8,7 +8,8 @@ defmodule CalliopeCompilerTest do
         [ indent: 1, tag: "h1", content: "Calliope" ],
         [ indent: 1, tag: "h2", content: "An Elixir Haml Parser"],
         [ indent: 1, id: "main", classes: ["content"], children: [
-            [ indent: 2, content: "Welcome to Calliope" ]
+            [ indent: 2, content: "Welcome to Calliope" ],
+            [ indent: 2, tag: "br" ]
           ]
         ],
       ],
@@ -22,6 +23,7 @@ defmodule CalliopeCompilerTest do
       <h2>An Elixir Haml Parser</h2>
       <div id="main" class="content">
         Welcome to Calliope
+        <br>
       </div>
     </section>
     <section class="container"></section>
@@ -67,6 +69,9 @@ defmodule CalliopeCompilerTest do
     assert "\t\t</div>" == close("div", ["\t\t"])
     assert "</section>" == close("section")
     assert "" == close(nil)
+
+    assert "" == close("br")
+    assert "" == close("link")
   end
 
   test :compile do

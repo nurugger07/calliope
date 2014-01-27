@@ -1,6 +1,7 @@
 defmodule Calliope.Compiler do
 
-  @attributes [ :id, :classes, :attributes ]
+  @attributes   [ :id, :classes, :attributes ]
+  @self_closing [ "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr" ]
 
   def compile([]), do: ""
   def compile(nil), do: ""
@@ -14,6 +15,7 @@ defmodule Calliope.Compiler do
   end
 
   def close( nil, _), do: ""
+  def close(tag_value, _) when tag_value in @self_closing, do: ""
   def close(tag_value, indent//[]), do: (indent ++ ["</#{tag_value}>"]) |> join
 
   def compile_attributes(list) do
