@@ -34,7 +34,7 @@ defmodule CalliopeParserTest do
       [ tag: "section", classes: ["container"] ]
     ]
 
-  @children Keyword.fetch!(Enum.first(@nested_tree), :children)
+  @children Keyword.fetch!(List.first(@nested_tree), :children)
 
   test :parse do
     result = parse(@tokens)
@@ -42,7 +42,7 @@ defmodule CalliopeParserTest do
     # Count root level
     assert Enum.count(result) == 2
     # Count children
-    assert (Enum.count (Enum.first(result))) == 3
+    assert (Enum.count (List.first(result))) == 3
   end
 
   test :parse_line do
