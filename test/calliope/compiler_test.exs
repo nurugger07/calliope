@@ -4,6 +4,7 @@ defmodule CalliopeCompilerTest do
   import Calliope.Compiler
 
   @ast [
+    [ doctype: "!!! 5" ],
     [ tag: "section", classes: ["container"], children: [
         [ indent: 1, tag: "h1", content: "Calliope" ],
         [ indent: 1, tag: "h2", content: "An Elixir Haml Parser"],
@@ -18,6 +19,7 @@ defmodule CalliopeCompilerTest do
   ]
 
   @html Regex.replace(%r/(^\s*)|(\s+$)|(\n)/m, %s{
+    <!DOCTYPE html>
     <section class="container">
       <h1>Calliope</h1>
       <h2>An Elixir Haml Parser</h2>
@@ -46,6 +48,7 @@ defmodule CalliopeCompilerTest do
     assert "div" == tag([id: "foo"])
     assert "div" == tag([classes: ["bar"]])
     assert "section" == tag([tag: "section"])
+    assert "!!! 5" == tag([doctype: "!!! 5"])
     assert nil == tag([content: "Welcome to Calliope"])
   end
 
@@ -53,6 +56,9 @@ defmodule CalliopeCompilerTest do
     assert "<div>"     == open("", :div)
     assert "<section>" == open("", :section)
     assert "" == open("", nil)
+
+    assert "<!DOCTYPE html>" == open("", "!!! 5")
+    assert "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" == open("", "!!!")
 
     assert "<div id=\"foo\" class=\"bar\">" == open(" id=\"foo\" class=\"bar\"", :div)
   end
