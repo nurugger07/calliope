@@ -3,7 +3,7 @@ defmodule CalliopeTokenizerTest do
 
   import Calliope.Tokenizer
 
-  @haml "%section.container\n\t%h1 Calliope\n\t%h2 An Elixir Haml Parser\n\t.content\n\t\tWelcome to Calliope"
+  @haml "\n%section.container\n\t%h1 Calliope\n\t%h2 An Elixir Haml Parser\n\t.content\n\t\tWelcome to Calliope"
 
   test :tokenize_inline_haml do
     inline = "%div Hello Calliope"
@@ -18,6 +18,31 @@ defmodule CalliopeTokenizerTest do
       ["\t", ".content"],
       ["\t\t", "Welcome to Calliope"]
     ] == tokenize(@haml)
+  end
+
+  test :tokenize_line do
+    assert [["%section", ".container"]] == tokenize("\n%section.container")
+  end
+
+  test :tokenize_identation do
+    assert [
+        ["%section"],
+        ["\t", "%h1", "Calliope"],
+        ["\t", "%h2", "Subtitle"],
+        ["\t\t", "%section"]
+      ] == tokenize_identation [
+        ["%section"],
+        ["  ", "%h1", "Calliope"],
+        ["  ", "%h2", "Subtitle"],
+        ["    ", "%section"]
+      ], 2
+  end
+
+  test :compute_tabs do
+    assert 0 == compute_tabs [["aa"]]
+    assert 2 == compute_tabs [["aa"], ["  ", "aa"]]
+    assert 4 == compute_tabs [["aa"], ["    ", "aa"]]
+    assert 2 == compute_tabs [["aa"], ["  ", "aa"], ["    ", "aa"]]
   end
 
 end

@@ -21,8 +21,8 @@ defmodule Calliope.Parser do
       @tag      -> acc ++ [ tag: val ]
       @id       -> acc ++ [ id: val ]
       @class    -> merge_into(:classes, acc, val)
-      @content  -> acc ++ [ content: val ]
       @tab      -> acc ++ [ indent: String.length(h) ]
+      _         -> acc ++ [ content: String.strip(h) ]
     end
     parse_line(t, acc)
   end

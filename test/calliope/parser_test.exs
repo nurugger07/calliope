@@ -5,8 +5,8 @@ defmodule CalliopeParserTest do
 
   @tokens [
       ["%section", ".container"],
-      ["\t", "%h1", " Calliope"],
-      ["\t", "%h2", " An Elixir Haml Parser"],
+      ["\t", "%h1", "Calliope"],
+      ["\t", "%h2", "An Elixir Haml Parser"],
       ["\t", "#main", ".content"],
       ["\t\t", " Welcome to Calliope"],
       ["%section", ".container"],
