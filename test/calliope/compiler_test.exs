@@ -15,7 +15,10 @@ defmodule CalliopeCompilerTest do
         ],
       ],
     ],
-    [ tag: "section", classes: ["container"] ]
+    [ tag: "section", classes: ["container"], children: [
+        [ indent: 1, tag: "img", attributes: "src='#'"]
+      ]
+    ]
   ]
 
   @html Regex.replace(%r/(^\s*)|(\s+$)|(\n)/m, %s{
@@ -28,7 +31,9 @@ defmodule CalliopeCompilerTest do
         <br>
       </div>
     </section>
-    <section class="container"></section>
+    <section class="container">
+      <img src='#'>
+    </section>
   }, "")
 
   test :compile_attributes do

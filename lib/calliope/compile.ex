@@ -36,6 +36,7 @@ defmodule Calliope.Compiler do
   def reject_or_compile_key( _, nil), do: nil
   def reject_or_compile_key(key, value), do: compile_key({ key, value })
 
+  def compile_key({ :attributes, value }), do: " #{value}"
   def compile_key({ :classes, value}), do: " class=\"#{Enum.join(value)}\""
   def compile_key({ :id, value }), do: " id=\"#{value}\""
 
