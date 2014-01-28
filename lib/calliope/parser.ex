@@ -5,6 +5,7 @@ defmodule Calliope.Parser do
   @class    "."
   @content  " "
   @tab      "\t"
+  @doctype  "!"
 
   def parse([]), do: []
   def parse(l) do
@@ -18,6 +19,7 @@ defmodule Calliope.Parser do
   def parse_line([h|t], acc//[]) do
     [sym, val] = [head(h), tail(h)]
     acc = case sym do
+      @doctype  -> acc ++ [ doctype: h ]
       @tag      -> acc ++ [ tag: val ]
       @id       -> acc ++ [ id: val ]
       @class    -> merge_into(:classes, acc, val)
@@ -36,7 +38,7 @@ defmodule Calliope.Parser do
   defp build_children([]), do: []
   defp build_children(l), do: [children: build_tree(l)]
 
-  def pop_children(parent, list) do
+  defp pop_children(parent, list) do
     { children, rem }  = Enum.split_while(list, &bigger_indentation?(&1, parent))
     { rem, children }
   end
