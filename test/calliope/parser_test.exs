@@ -10,7 +10,8 @@ defmodule CalliopeParserTest do
       ["\t", "%h2", "An Elixir Haml Parser"],
       ["\t", "#main", ".content"],
       ["\t\t", " Welcome to Calliope"],
-      ["%section", ".container"],
+      ["%section", ".container", "(data-a: 'calliope', data-b: 'awesome')"],
+      ["\t", "%img", "{src='#'}"],
     ]
 
   @parsed_tokens [
@@ -20,7 +21,8 @@ defmodule CalliopeParserTest do
       [ indent: 1, tag: "h2", content: "An Elixir Haml Parser" ],
       [ indent: 1, id: "main", classes: ["content"] ],
       [ indent: 2, content: "Welcome to Calliope" ],
-      [ tag: "section", classes: ["container"] ]
+      [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'" ],
+      [ indent: 1, tag: "img", attributes: "src='#'" ]
     ]
 
   @nested_tree [
@@ -34,7 +36,10 @@ defmodule CalliopeParserTest do
           ],
         ],
       ],
-      [ tag: "section", classes: ["container"] ]
+      [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'",children: [
+          [ indent: 1, tag: "img", attributes: "src='#'"]
+        ]
+      ]
     ]
 
   test :parse_line do
@@ -44,6 +49,8 @@ defmodule CalliopeParserTest do
     assert parsed_tokens(3) == parsed_line_tokens(tokens(3))
     assert parsed_tokens(4) == parsed_line_tokens(tokens(4))
     assert parsed_tokens(5) == parsed_line_tokens(tokens(5))
+    assert parsed_tokens(6) == parsed_line_tokens(tokens(6))
+    assert parsed_tokens(7) == parsed_line_tokens(tokens(7))
   end
 
   test :build_tree do

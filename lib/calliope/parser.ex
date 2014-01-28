@@ -6,6 +6,8 @@ defmodule Calliope.Parser do
   @content  " "
   @tab      "\t"
   @doctype  "!"
+  @attrs    "{"
+  @parens   "("
 
   def parse([]), do: []
   def parse(l) do
@@ -24,6 +26,8 @@ defmodule Calliope.Parser do
       @id       -> acc ++ [ id: val ]
       @class    -> merge_into(:classes, acc, val)
       @tab      -> acc ++ [ indent: String.length(h) ]
+      @attrs    -> merge_attributes( acc, val)
+      @parens   -> merge_attributes( acc, val)
       _         -> acc ++ [ content: String.strip(h) ]
     end
     parse_line(t, acc)
@@ -45,6 +49,14 @@ defmodule Calliope.Parser do
 
   defp bigger_indentation?(token1, token2) do
     Keyword.get(token1, :indent, 0) > Keyword.get(token2, :indent, 0)
+  end
+
+  defp merge_attributes(list, value), do: list ++ [attributes: build_attributes(value)]
+
+  defp build_attributes(value) do
+    String.slice(value, 0, String.length(value)-1) |>
+      String.replace(%r/:\s?/, "=") |>
+      String.replace(%r/,\s?/, " ")
   end
 
   defp merge_into(key, list, value) do
