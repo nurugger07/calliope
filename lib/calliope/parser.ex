@@ -82,6 +82,7 @@ defmodule Calliope.Parser do
   defp merge_into(:id, list, []), do: list
   defp merge_into(:id, list, [h|_]), do: list ++ [ id: h ]
 
+  defp merge_into(_, list, []), do: list
   defp merge_into(key, list, value) do
     value = cond do
       list[key] -> list[key] ++ value
