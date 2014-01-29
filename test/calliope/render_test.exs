@@ -5,7 +5,7 @@ defmodule CalliopeRenderTest do
 
   @haml %s{
 !!! 5
-%section.container
+%section.container{ class: "blue" }
 	%h1 Calliope
 	%h2 An Elixir Haml Parser
 	#main.content
@@ -13,7 +13,7 @@ defmodule CalliopeRenderTest do
 
   @html Regex.replace(%r/(^\s*)|(\s+$)|(\n)/m, %s{
     <!DOCTYPE html>
-    <section class="container">
+    <section class="container blue">
       <h1>Calliope</h1>
       <h2>An Elixir Haml Parser</h2>
       <div id="main" class="content">

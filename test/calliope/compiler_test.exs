@@ -37,7 +37,7 @@ defmodule CalliopeCompilerTest do
   }, "")
 
   test :compile_attributes do
-    assert " id=\"foo\" class=\"bar\"" ==  compile_attributes([ id: "foo", classes: ["bar"] ])
+    assert " id=\"foo\" class=\"bar baz\"" ==  compile_attributes([ id: "foo", classes: ["bar", "baz"] ])
     assert " class=\"bar\"" ==  compile_attributes([ classes: ["bar"] ])
     assert " id=\"foo\"" ==  compile_attributes([ id: "foo"])
   end

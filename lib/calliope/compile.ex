@@ -30,14 +30,14 @@ defmodule Calliope.Compiler do
   def close(tag_value), do: "</#{tag_value}>"
 
   def compile_attributes(list) do
-    Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1]))
+    Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1])) |> String.rstrip
   end
 
   def reject_or_compile_key( _, nil), do: nil
   def reject_or_compile_key(key, value), do: compile_key({ key, value })
 
   def compile_key({ :attributes, value }), do: " #{value}"
-  def compile_key({ :classes, value}), do: " class=\"#{Enum.join(value)}\""
+  def compile_key({ :classes, value}), do: " class=\"#{Enum.join(value, " ")}\""
   def compile_key({ :id, value }), do: " id=\"#{value}\""
 
   def tag(node) do
