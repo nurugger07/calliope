@@ -1,0 +1,37 @@
+!!! 5
+%html{lang: "en-US"}
+  %head
+    %title Welcome to Calliope
+    %meta{charset: "UTF-8"}
+    %meta{content: "width=device-width", "maximum-scale": "1.0,", name: "viewport", "user-scalable": "0,"}
+    /[if IE]
+      <script src="/javascripts/html5.js" type="text/javascript"></script>
+    %link{href: "/static/stylesheets/application.css", media: "screen", rel: "stylesheet", type: "text/css"}
+    %link{href: "http://fonts.googleapis.com/css?family=Raleway:800,200|Merriweather:400,400italic", rel: "stylesheet", type: "text/css"}
+  %body
+    %header
+      .container
+        %h1
+          %a{href: "/"} Welcome to Calliope
+        .session
+          %a.username{href: "#"} Achilles
+          %a.button.signinout{href: "/authentication/destroy"} Sign Out
+    .container
+      %section
+        %article.blog_post
+          %h1
+            %a{href: "#"} Learning about Haml
+          %p
+            You can learn more about Haml by taking the time to RTFM
+          %a.button.readmore{href: "#"} Read More
+        %article.blog_post
+          %h1
+            %a{href: "#"} Learning about Calliope
+          %p
+            See the first post
+          %a.button.readmore{href: "#"} Read More
+    %footer
+      .container
+        %p
+          A haml parser
+          %a{href: "http://www.github.com/nurugger07", target: "_blank"} Johnny Winn
