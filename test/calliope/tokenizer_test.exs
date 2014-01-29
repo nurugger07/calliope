@@ -3,7 +3,15 @@ defmodule CalliopeTokenizerTest do
 
   import Calliope.Tokenizer
 
-  @haml "!!! 5\n%section.container\n\t%h1 Calliope\n\t%h2 An Elixir Haml Parser\n\t.content\n\t\tWelcome to Calliope"
+  @haml %s{
+!!! 5
+%section.container
+  %h1 Calliope
+  / %h1 An important inline comment
+  /[if IE]
+    %h2 An Elixir Haml Parser
+  .content
+    Welcome to Calliope}
 
   test :tokenize_inline_haml do
     inline = "%div Hello Calliope"
@@ -15,7 +23,9 @@ defmodule CalliopeTokenizerTest do
       ["!!! 5"],
       ["%section", ".container"],
       ["\t", "%h1", "Calliope"],
-      ["\t", "%h2", "An Elixir Haml Parser"],
+      ["\t", "/ ", "%h1", "An important inline comment"],
+      ["\t", "/[if IE]"],
+      ["\t\t", "%h2", "An Elixir Haml Parser"],
       ["\t", ".content"],
       ["\t\t", "Welcome to Calliope"]
     ] == tokenize(@haml)

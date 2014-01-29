@@ -7,7 +7,9 @@ defmodule CalliopeParserTest do
       ["!!! 5"],
       ["%section", ".container", ".blue"],
       ["\t", "%h1", "Calliope"],
-      ["\t", "%h2", "An Elixir Haml Parser"],
+      ["\t", "/", "%h1", "An important inline comment"],
+      ["\t", "/[if IE]"],
+      ["\t\t", "%h2", "An Elixir Haml Parser"],
       ["\t", "#main", ".content"],
       ["\t\t", " Welcome to Calliope"],
       ["%section", ".container", "(data-a: 'calliope', data-b: 'awesome')"],
@@ -18,7 +20,9 @@ defmodule CalliopeParserTest do
       [ doctype: "!!! 5" ],
       [ tag: "section", classes: ["container", "blue"] ],
       [ indent: 1, tag: "h1", content: "Calliope" ],
-      [ indent: 1, tag: "h2", content: "An Elixir Haml Parser" ],
+      [ indent: 1, comment: "!--", tag: "h1", content: "An important inline comment" ],
+      [ indent: 1, comment: "!--[if IE]" ],
+      [ indent: 2, tag: "h2", content: "An Elixir Haml Parser" ],
       [ indent: 1, id: "main", classes: ["content"] ],
       [ indent: 2, content: "Welcome to Calliope" ],
       [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'" ],
@@ -29,7 +33,11 @@ defmodule CalliopeParserTest do
       [ doctype: "!!! 5" ],
       [ tag: "section", classes: ["container", "blue"], children: [
           [ indent: 1, tag: "h1", content: "Calliope" ],
-          [ indent: 1, tag: "h2",content: "An Elixir Haml Parser"],
+          [ indent: 1, comment: "!--", tag: "h1", content: "An important inline comment" ],
+          [ indent: 1, comment: "!--[if IE]", children: [
+              [ indent: 2, tag: "h2",content: "An Elixir Haml Parser"]
+            ]
+          ],
           [ indent: 1, id: "main", classes: ["content"], children: [
               [ indent: 2, content: "Welcome to Calliope" ]
             ]

@@ -8,6 +8,7 @@ defmodule Calliope.Parser do
   @doctype  "!"
   @attrs    "{"
   @parens   "("
+  @comment  "/"
 
   def parse([]), do: []
   def parse(l) do
@@ -28,10 +29,13 @@ defmodule Calliope.Parser do
       @tab      -> acc ++ [ indent: String.length(h) ]
       @attrs    -> merge_attributes( acc, val)
       @parens   -> merge_attributes( acc, val)
+      @comment  -> acc ++ handle_comment(val)
       _         -> acc ++ [ content: String.strip(h) ]
     end
     parse_line(t, acc)
   end
+
+ def handle_comment(val), do: [ comment: String.rstrip "!--#{val}" ]
 
   def build_tree([]), do: []
   def build_tree([h|t]) do

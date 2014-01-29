@@ -7,7 +7,11 @@ defmodule CalliopeCompilerTest do
     [ doctype: "!!! 5" ],
     [ tag: "section", classes: ["container"], children: [
         [ indent: 1, tag: "h1", content: "Calliope" ],
-        [ indent: 1, tag: "h2", content: "An Elixir Haml Parser"],
+        [ indent: 1, tag: "h1",  comment: "!--", content: "An important inline comment" ],
+        [ indent: 1, comment: "!--[if IE]", children: [
+            [ indent: 1, tag: "h2", content: "An Elixir Haml Parser"]
+          ]
+        ],
         [ indent: 1, id: "main", classes: ["content"], children: [
             [ indent: 2, content: "Welcome to Calliope" ],
             [ indent: 2, tag: "br" ]
@@ -25,7 +29,8 @@ defmodule CalliopeCompilerTest do
     <!DOCTYPE html>
     <section class="container">
       <h1>Calliope</h1>
-      <h2>An Elixir Haml Parser</h2>
+      <!-- <h1>An important inline comment</h1> -->
+      <!--[if IE]> <h2>An Elixir Haml Parser</h2> <![endif]-->
       <div id="main" class="content">
         Welcome to Calliope
         <br>

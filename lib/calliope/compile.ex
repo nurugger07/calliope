@@ -17,8 +17,21 @@ defmodule Calliope.Compiler do
   def compile([]), do: ""
   def compile(nil), do: ""
   def compile([h|t]) do
-    open(compile_attributes(h), tag(h)) <> "#{h[:content]}" <> compile(h[:children]) <> close(tag(h)) <> compile(t)
+    comment(h[:comment], :open) <>
+      open(compile_attributes(h), tag(h)) <>
+        "#{h[:content]}" <>
+        compile(h[:children]) <>
+      close(tag(h)) <>
+    comment(h[:comment], :close) <>
+    compile(t)
   end
+
+  def comment(nil, _), do: ""
+  def comment("!--", :open), do: "<!-- "
+  def comment("!--", :close), do: " -->"
+
+  def comment(<<"!--" :: binary, condition :: binary>>, :open), do: "<!--#{condition}> "
+  def comment(<<"!--" :: binary, _ :: binary>>, :close), do: " <![endif]-->"
 
   def open( _, nil), do: ""
   def open( _, <<"!!!" :: binary, key :: binary>>), do: @doctypes[:"!!!#{key}"]
@@ -47,7 +60,7 @@ defmodule Calliope.Compiler do
       has_any_key?(node, [:tag]) -> Keyword.get(node, :tag)
       has_any_key?(node, [:id, :classes]) -> "div"
       has_any_key?(node, [:content]) -> nil
-      true -> false #raise an error
+      true -> nil
     end
   end
 
