@@ -28,7 +28,13 @@ defmodule CalliopeRenderTest do
     </section>
   }, "")
 
+  @haml_with_args "= arg"
+
   test :render do
     assert @html == render @haml
+  end
+
+  test :render_with_params do
+    assert "Calliope" == render @haml_with_args, [ arg: "Calliope" ]
   end
 end

@@ -14,16 +14,23 @@ defmodule Calliope.Compiler do
     { :"!!! RDFa", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML+RDFa 1.0//EN\" \"http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd\">" }
   ]
 
-  def compile([]), do: ""
-  def compile(nil), do: ""
-  def compile([h|t]) do
+  def compile([], _), do: ""
+  def compile(nil, _), do: ""
+  def compile([h|t], args//[]) do
     comment(h[:comment], :open) <>
       open(compile_attributes(h), tag(h)) <>
         "#{h[:content]}" <>
-        compile(h[:children]) <>
+        evaluate_script(h[:script], args) <>
+        compile(h[:children], args) <>
       close(tag(h)) <>
     comment(h[:comment], :close) <>
-    compile(t)
+    compile(t, args)
+  end
+
+  def evaluate_script(nil, _), do: ""
+  def evaluate_script(script, args) do
+    {result, _} = Code.eval_string(script, args)
+    result
   end
 
   def comment(nil, _), do: ""

@@ -9,6 +9,7 @@ defmodule Calliope.Parser do
   @attrs    "{"
   @parens   "("
   @comment  "/"
+  @script   "="
 
   def parse([]), do: []
   def parse(l) do
@@ -30,6 +31,7 @@ defmodule Calliope.Parser do
       @attrs    -> merge_attributes( acc, val)
       @parens   -> merge_attributes( acc, val)
       @comment  -> acc ++ handle_comment(val)
+      @script   -> acc ++ [ script: val ]
       _         -> acc ++ [ content: String.strip(h) ]
     end
     parse_line(t, acc)

@@ -6,7 +6,7 @@ defmodule CalliopeCompilerTest do
   @ast [
     [ doctype: "!!! 5" ],
     [ tag: "section", classes: ["container"], children: [
-        [ indent: 1, tag: "h1", content: "Calliope" ],
+        [ indent: 1, tag: "h1", children: [ [ indent: 2, script: "arg"] ] ],
         [ indent: 1, tag: "h1",  comment: "!--", content: "An important inline comment" ],
         [ indent: 1, comment: "!--[if IE]", children: [
             [ indent: 1, tag: "h2", content: "An Elixir Haml Parser"]
@@ -28,7 +28,9 @@ defmodule CalliopeCompilerTest do
   @html Regex.replace(%r/(^\s*)|(\s+$)|(\n)/m, %s{
     <!DOCTYPE html>
     <section class="container">
-      <h1>Calliope</h1>
+      <h1>
+        Calliope
+      </h1>
       <!-- <h1>An important inline comment</h1> -->
       <!--[if IE]> <h2>An Elixir Haml Parser</h2> <![endif]-->
       <div id="main" class="content">
@@ -91,6 +93,6 @@ defmodule CalliopeCompilerTest do
 
      assert %s{content} == compile([[content: "content"]])
 
-     assert @html == compile(@ast)
+     assert @html == compile(@ast, [arg: "Calliope"])
   end
 end

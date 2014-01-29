@@ -11,6 +11,7 @@ defmodule CalliopeParserTest do
       ["\t", "/[if IE]"],
       ["\t\t", "%h2", "An Elixir Haml Parser"],
       ["\t", "#main", ".content"],
+      ["\t\t", "= arg"],
       ["\t\t", " Welcome to Calliope"],
       ["%section", ".container", "(data-a: 'calliope', data-b: 'awesome')"],
       ["\t", "%img", ".one", "{id: 'main_image', class: 'two three', src: '#'}"],
@@ -24,6 +25,7 @@ defmodule CalliopeParserTest do
       [ indent: 1, comment: "!--[if IE]" ],
       [ indent: 2, tag: "h2", content: "An Elixir Haml Parser" ],
       [ indent: 1, id: "main", classes: ["content"] ],
+      [ indent: 2, script: " arg" ],
       [ indent: 2, content: "Welcome to Calliope" ],
       [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'" ],
       [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='#'" ]
@@ -39,6 +41,7 @@ defmodule CalliopeParserTest do
             ]
           ],
           [ indent: 1, id: "main", classes: ["content"], children: [
+              [ indent: 2, script: " arg" ],
               [ indent: 2, content: "Welcome to Calliope" ]
             ]
           ],

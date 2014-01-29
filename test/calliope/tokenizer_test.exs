@@ -11,6 +11,7 @@ defmodule CalliopeTokenizerTest do
   /[if IE]
     %h2 An Elixir Haml Parser
   .content
+    = arg
     Welcome to Calliope}
 
   test :tokenize_inline_haml do
@@ -27,6 +28,7 @@ defmodule CalliopeTokenizerTest do
       ["\t", "/[if IE]"],
       ["\t\t", "%h2", "An Elixir Haml Parser"],
       ["\t", ".content"],
+      ["\t\t", "= arg"],
       ["\t\t", "Welcome to Calliope"]
     ] == tokenize(@haml)
   end
