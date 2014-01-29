@@ -5,29 +5,29 @@ defmodule CalliopeParserTest do
 
   @tokens [
       ["!!! 5"],
-      ["%section", ".container"],
+      ["%section", ".container", ".blue"],
       ["\t", "%h1", "Calliope"],
       ["\t", "%h2", "An Elixir Haml Parser"],
       ["\t", "#main", ".content"],
       ["\t\t", " Welcome to Calliope"],
       ["%section", ".container", "(data-a: 'calliope', data-b: 'awesome')"],
-      ["\t", "%img", "{src='#'}"],
+      ["\t", "%img", ".one", "{id: 'main_image', class: 'two three', src: '#'}"],
     ]
 
   @parsed_tokens [
       [ doctype: "!!! 5" ],
-      [ tag: "section", classes: ["container"] ],
+      [ tag: "section", classes: ["container", "blue"] ],
       [ indent: 1, tag: "h1", content: "Calliope" ],
       [ indent: 1, tag: "h2", content: "An Elixir Haml Parser" ],
       [ indent: 1, id: "main", classes: ["content"] ],
       [ indent: 2, content: "Welcome to Calliope" ],
       [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'" ],
-      [ indent: 1, tag: "img", attributes: "src='#'" ]
+      [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='#'" ]
     ]
 
   @nested_tree [
       [ doctype: "!!! 5" ],
-      [ tag: "section", classes: ["container"], children: [
+      [ tag: "section", classes: ["container", "blue"], children: [
           [ indent: 1, tag: "h1", content: "Calliope" ],
           [ indent: 1, tag: "h2",content: "An Elixir Haml Parser"],
           [ indent: 1, id: "main", classes: ["content"], children: [
@@ -37,7 +37,7 @@ defmodule CalliopeParserTest do
         ],
       ],
       [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'",children: [
-          [ indent: 1, tag: "img", attributes: "src='#'"]
+          [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='#'"]
         ]
       ]
     ]

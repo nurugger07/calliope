@@ -22,7 +22,7 @@ defmodule CalliopeTokenizerTest do
   end
 
   test :tokenize_line do
-    assert [["%section", ".container", "{src='#', data='cool'}", "Calliope"]] == tokenize("\n%section.container{src='#', data='cool'} Calliope")
+    assert [["%section", ".container", ".blue", "{src='#', data='cool'}", "Calliope"]] == tokenize("\n%section.container.blue{src='#', data='cool'} Calliope")
     assert [["%section", ".container", "(src='#', data='cool')", "Calliope"]] == tokenize("\n%section.container(src='#', data='cool') Calliope")
   end
 

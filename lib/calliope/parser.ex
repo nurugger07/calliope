@@ -24,7 +24,7 @@ defmodule Calliope.Parser do
       @doctype  -> acc ++ [ doctype: h ]
       @tag      -> acc ++ [ tag: val ]
       @id       -> acc ++ [ id: val ]
-      @class    -> merge_into(:classes, acc, val)
+      @class    -> merge_into(:classes, acc, [val])
       @tab      -> acc ++ [ indent: String.length(h) ]
       @attrs    -> merge_attributes( acc, val)
       @parens   -> merge_attributes( acc, val)
@@ -51,18 +51,37 @@ defmodule Calliope.Parser do
     Keyword.get(token1, :indent, 0) > Keyword.get(token2, :indent, 0)
   end
 
-  defp merge_attributes(list, value), do: list ++ [attributes: build_attributes(value)]
+  def merge_attributes(list, value) do
+    classes = extract(:class, value)
+    id = extract(:id, value)
+    attributes = build_attributes(value)
+
+    merge_into(:classes, merge_into(:id, list, id), classes) ++ [attributes: attributes ]
+  end
+
+  def extract(key, str) do
+    case Regex.run(%r/#{key}[=:]\s?['"](.*)['"]/r, str) do
+      [ _, match | _ ] -> String.split match
+      _ -> []
+    end
+  end
 
   defp build_attributes(value) do
     String.slice(value, 0, String.length(value)-1) |>
+      String.replace(%r/class[=:]\s?['"](.*)['"]/r, "") |>
+      String.replace(%r/id[=:]\s?['"](.*)['"]/r, "") |>
       String.replace(%r/:\s?/, "=") |>
-      String.replace(%r/,\s?/, " ")
+      String.replace(%r/,\s?/, " ") |>
+      String.strip
   end
+
+  defp merge_into(:id, list, []), do: list
+  defp merge_into(:id, list, [h|_]), do: list ++ [ id: h ]
 
   defp merge_into(key, list, value) do
     value = cond do
-      list[key] -> [list[key]] ++ [value]
-      true      -> [value]
+      list[key] -> list[key] ++ value
+      true      -> value
     end
     Keyword.put(list, key, value) |> Enum.reverse
   end
