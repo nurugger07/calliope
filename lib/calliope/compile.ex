@@ -18,8 +18,8 @@ defmodule Calliope.Compiler do
   def compile(nil, _), do: ""
   def compile([h|t], args//[]) do
     comment(h[:comment], :open) <>
-      open(compile_attributes(h), tag(h)) <>
-        "#{h[:content]}" <>
+      open(compile_attributes(h, args), tag(h)) <>
+        evaluate_content("#{h[:content]}", args) <>
         evaluate_script(h[:script], args) <>
         compile(h[:children], args) <>
       close(tag(h)) <>
@@ -31,6 +31,18 @@ defmodule Calliope.Compiler do
   def evaluate_script(script, args) do
     {result, _} = Code.eval_string(script, args)
     result
+  end
+
+  def evaluate_content(nil, _), do: ""
+  def evaluate_content(content, []), do: content
+  def evaluate_content(content, args//[]) do
+    Regex.scan(%r/\#{(.+)}/r, content) |>
+      map_content_to_args(content, args)
+  end
+
+  defp map_content_to_args([], content, _), do: content
+  defp map_content_to_args([[key, val]|t], content, args) do
+    map_content_to_args(t, String.replace(content, key, evaluate_script(val, args)), args)
   end
 
   def comment(nil, _), do: ""
@@ -49,8 +61,14 @@ defmodule Calliope.Compiler do
   def close(tag_value) when tag_value in @self_closing, do: ""
   def close(tag_value), do: "</#{tag_value}>"
 
-  def compile_attributes(list) do
-    Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1])) |> String.rstrip
+  def compile_attributes(list, []) do
+    Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1])) |>
+      String.rstrip
+  end
+  def compile_attributes(list, args) do
+    Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1])) |>
+      evaluate_content(args) |>
+      String.rstrip
   end
 
   def reject_or_compile_key( _, nil), do: nil

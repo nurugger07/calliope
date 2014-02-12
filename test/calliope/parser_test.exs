@@ -12,9 +12,9 @@ defmodule CalliopeParserTest do
       ["\t\t", "%h2", "An Elixir Haml Parser"],
       ["\t", "#main", ".content"],
       ["\t\t", "= arg"],
-      ["\t\t", " Welcome to Calliope"],
+      ["\t\t", " Welcome to \#{title}"],
       ["%section", ".container", "(data-a: 'calliope', data-b: 'awesome')"],
-      ["\t", "%img", ".one", "{id: 'main_image', class: 'two three', src: '#'}"],
+      ["\t", "%img", ".one", "{id: 'main_image', class: 'two three', src: url}"],
     ]
 
   @parsed_tokens [
@@ -26,9 +26,9 @@ defmodule CalliopeParserTest do
       [ indent: 2, tag: "h2", content: "An Elixir Haml Parser" ],
       [ indent: 1, id: "main", classes: ["content"] ],
       [ indent: 2, script: " arg" ],
-      [ indent: 2, content: "Welcome to Calliope" ],
+      [ indent: 2, content: "Welcome to \#{title}" ],
       [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'" ],
-      [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='#'" ]
+      [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'" ]
     ]
 
   @nested_tree [
@@ -42,13 +42,13 @@ defmodule CalliopeParserTest do
           ],
           [ indent: 1, id: "main", classes: ["content"], children: [
               [ indent: 2, script: " arg" ],
-              [ indent: 2, content: "Welcome to Calliope" ]
+              [ indent: 2, content: "Welcome to \#{title}" ]
             ]
           ],
         ],
       ],
       [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'",children: [
-          [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='#'"]
+          [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'"]
         ]
       ]
     ]
@@ -62,10 +62,18 @@ defmodule CalliopeParserTest do
     assert parsed_tokens(5) == parsed_line_tokens(tokens(5))
     assert parsed_tokens(6) == parsed_line_tokens(tokens(6))
     assert parsed_tokens(7) == parsed_line_tokens(tokens(7))
+    assert parsed_tokens(8) == parsed_line_tokens(tokens(8))
+    assert parsed_tokens(9) == parsed_line_tokens(tokens(9))
+    assert parsed_tokens(10) == parsed_line_tokens(tokens(10))
   end
 
   test :build_tree do
     assert @nested_tree == build_tree @parsed_tokens
+  end
+
+  test :build_attributes do
+    assert "href='http://google.com'" == build_attributes("href: 'http://google.com' }")
+    assert "src='\#{url}'" == build_attributes("src: url }")
   end
 
   defp tokens(n), do: line(@tokens, n)

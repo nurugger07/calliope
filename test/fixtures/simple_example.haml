@@ -1,7 +1,7 @@
 !!! 5
 %html{lang: "en-US"}
   %head
-    %title Welcome to Calliope
+    %title Welcome to #{title}
     %meta{charset: "UTF-8"}
     %meta{content: "width=device-width", "maximum-scale": "1.0,", name: "viewport", "user-scalable": "0,"}
     /[if IE]
@@ -12,7 +12,7 @@
     %header
       .container
         %h1
-          %a{href: "/"} Welcome to Calliope
+          %a{href: url} Welcome to #{title}
         .session
           %a.username{href: "#"} Achilles
           %a.button.signinout{href: "/authentication/destroy"} Sign Out
@@ -26,7 +26,7 @@
           %a.button.readmore{href: "#"} Read More
         %article.blog_post
           %h1
-            %a{href: "#"} Learning about Calliope
+            %a{href: "#"} Learning about #{title}
           %p
             See the first post
           %a.button.readmore{href: "#"} Read More
