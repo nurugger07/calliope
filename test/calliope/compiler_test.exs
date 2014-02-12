@@ -43,10 +43,15 @@ defmodule CalliopeCompilerTest do
     </section>
   }, "")
 
+  test :evaluate_content do
+    assert "Hello Johnny" == evaluate_content("Hello \#{name}", [name: "Johnny"])
+  end
+
   test :compile_attributes do
-    assert " id=\"foo\" class=\"bar baz\"" ==  compile_attributes([ id: "foo", classes: ["bar", "baz"] ])
-    assert " class=\"bar\"" ==  compile_attributes([ classes: ["bar"] ])
-    assert " id=\"foo\"" ==  compile_attributes([ id: "foo"])
+    assert " id=\"foo\" class=\"bar baz\"" ==  
+      compile_attributes([ id: "foo", classes: ["bar", "baz"] ], [])
+    assert " class=\"bar\"" ==  compile_attributes([ classes: ["bar"] ], [])
+    assert " id=\"foo\"" ==  compile_attributes([ id: "foo"], [])
   end
 
   test :compile_key do

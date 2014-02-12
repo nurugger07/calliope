@@ -17,6 +17,7 @@ defmodule CalliopeTokenizerTest do
   test :tokenize_inline_haml do
     inline = "%div Hello Calliope"
     assert [["%div","Hello Calliope"]] == tokenize(inline)
+    assert [["%h1", "This is \#{title}"]] == tokenize("%h1 This is \#{title}")
   end
 
   test :tokenize_multiline_haml do
@@ -34,8 +35,12 @@ defmodule CalliopeTokenizerTest do
   end
 
   test :tokenize_line do
-    assert [["%section", ".container", ".blue", "{src='#', data='cool'}", "Calliope"]] == tokenize("\n%section.container.blue{src='#', data='cool'} Calliope")
-    assert [["%section", ".container", "(src='#', data='cool')", "Calliope"]] == tokenize("\n%section.container(src='#', data='cool') Calliope")
+    assert [["%section", ".container", ".blue", "{src='#', data='cool'}", "Calliope"]] ==
+      tokenize("\n%section.container.blue{src='#', data='cool'} Calliope")
+    assert [["%section", ".container", "(src='#', data='cool')", "Calliope"]] ==
+      tokenize("\n%section.container(src='#', data='cool') Calliope")
+    assert [["\t", "%a", "{href: \"#\"}", "Learning about \#{title}"]] ==
+      tokenize("\t%a{href: \"#\"} Learning about \#{title}")
   end
 
   test :tokenize_identation do

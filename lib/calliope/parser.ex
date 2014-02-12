@@ -72,11 +72,12 @@ defmodule Calliope.Parser do
     end
   end
 
-  defp build_attributes(value) do
+  def build_attributes(value) do
     String.slice(value, 0, String.length(value)-1) |>
       String.replace(%r/class[=:]\s?['"](.*)['"]/r, "") |>
       String.replace(%r/id[=:]\s?['"](.*)['"]/r, "") |>
-      String.replace(%r/:\s?/, "=") |>
+      String.replace(%r/:\s(['"])/, "=\\1") |>
+      String.replace(%r/:\s(\w+)\s?/, "='\#{\\1}'") |>
       String.replace(%r/,\s?/, " ") |>
       String.strip
   end
