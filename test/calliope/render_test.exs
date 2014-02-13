@@ -3,7 +3,7 @@ defmodule CalliopeRenderTest do
 
   import Calliope.Render
 
-  @haml %s{
+  @haml ~s{
 !!! 5
 %section.container{class: "blue"}
   %article
@@ -14,7 +14,7 @@ defmodule CalliopeRenderTest do
     #main.content
       Welcome to Calliope}
 
-  @html Regex.replace(%r/(^\s*)|(\s+$)|(\n)/m, %s{
+  @html Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
     <!DOCTYPE html>
     <section class="container blue">
       <article>
