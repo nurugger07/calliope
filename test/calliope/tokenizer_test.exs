@@ -3,7 +3,7 @@ defmodule CalliopeTokenizerTest do
 
   import Calliope.Tokenizer
 
-  @haml %s{
+  @haml ~s{
 !!! 5
 %section.container
   %h1 Calliope

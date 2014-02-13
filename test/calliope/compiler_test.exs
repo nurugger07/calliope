@@ -25,7 +25,7 @@ defmodule CalliopeCompilerTest do
     ]
   ]
 
-  @html Regex.replace(%r/(^\s*)|(\s+$)|(\n)/m, %s{
+  @html Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
     <!DOCTYPE html>
     <section class="container">
       <h1>
@@ -90,13 +90,13 @@ defmodule CalliopeCompilerTest do
   end
 
   test :compile do
-     assert %s{<div id="test"></div>} == compile([[id: "test"]])
-     assert %s{<section id="test" class="content"></section>} == compile([[tag: "section", id: "test", classes: ["content"]]])
+     assert ~s{<div id="test"></div>} == compile([[id: "test"]])
+     assert ~s{<section id="test" class="content"></section>} == compile([[tag: "section", id: "test", classes: ["content"]]])
 
      children = [[classes: ["nested"]]]
-     assert %s{<div id="test"><div class="nested"></div></div>} == compile([[id: "test", children: children]])
+     assert ~s{<div id="test"><div class="nested"></div></div>} == compile([[id: "test", children: children]])
 
-     assert %s{content} == compile([[content: "content"]])
+     assert ~s{content} == compile([[content: "content"]])
 
      assert @html == compile(@ast, [arg: "Calliope"])
   end
