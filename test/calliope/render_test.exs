@@ -1,7 +1,7 @@
 defmodule CalliopeRenderTest do
   use ExUnit.Case
 
-  import Calliope.Render
+  use Calliope.Render
 
   @haml ~s{
 !!! 5
