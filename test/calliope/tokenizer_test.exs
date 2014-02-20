@@ -14,6 +14,12 @@ defmodule CalliopeTokenizerTest do
     = arg
     Welcome to Calliope}
 
+  @haml_with_collection  """
+- lc { content } inlist posts do
+  %div
+    = content
+"""
+
   test :tokenize_inline_haml do
     inline = "%div Hello Calliope"
     assert [["%div","Hello Calliope"]] == tokenize(inline)
@@ -32,6 +38,12 @@ defmodule CalliopeTokenizerTest do
       ["\t\t", "= arg"],
       ["\t\t", "Welcome to Calliope"]
     ] == tokenize(@haml)
+
+    assert [
+      ["- lc { content } inlist posts do"],
+      ["\t", "%div"],
+      ["\t\t", "= content"]
+      ] == tokenize(@haml_with_collection)
   end
 
   test :tokenize_line do

@@ -6,7 +6,10 @@ defmodule CalliopeCompilerTest do
   @ast [
     [ doctype: "!!! 5" ],
     [ tag: "section", classes: ["container"], children: [
-        [ indent: 1, tag: "h1", children: [ [ indent: 2, script: "arg"] ] ],
+        [ indent: 1, tag: "h1", children: [
+            [ indent: 2, script: "arg"]
+          ]
+        ],
         [ indent: 1, tag: "h1",  comment: "!--", content: "An important inline comment" ],
         [ indent: 1, comment: "!--[if IE]", children: [
             [ indent: 1, tag: "h2", content: "An Elixir Haml Parser"]
@@ -43,12 +46,17 @@ defmodule CalliopeCompilerTest do
     </section>
   }, "")
 
+
+  @smart [[smart_script: "lc { id, content } inlist posts do", children: [
+              [indent: 1, tag: "div", children: [[indent: 2, script: "content"]]]
+            ]]]
+
   test :evaluate_content do
     assert "Hello Johnny" == evaluate_content("Hello \#{name}", [name: "Johnny"])
   end
 
   test :compile_attributes do
-    assert " id=\"foo\" class=\"bar baz\"" ==  
+    assert " id=\"foo\" class=\"bar baz\"" ==
       compile_attributes([ id: "foo", classes: ["bar", "baz"] ], [])
     assert " class=\"bar\"" ==  compile_attributes([ classes: ["bar"] ], [])
     assert " id=\"foo\"" ==  compile_attributes([ id: "foo"], [])
@@ -100,4 +108,17 @@ defmodule CalliopeCompilerTest do
 
      assert @html == compile(@ast, [arg: "Calliope"])
   end
+
+  test :evaluate_multi_script do
+    children = [[ indent: 1, tag: "h1", children: [[ indent: 2, script: "greet"]]]]
+    assert "<h1>Hello</h1><h1>Hi</h1>" ==
+      evaluate_smart_script("lc greet inlist greetings do", children, [greetings: ["Hello", "Hi"]])
+
+    children = [[indent: 1, tag: "div", children: [[indent: 2, script: " content"]]]]
+    posts = [{1, "post 1"}, {2, "post 2"}]
+    assert "<div>post 1</div><div>post 2</div>" == evaluate_smart_script("lc { id, content } inlist posts do", children, [posts: posts])
+
+    assert "<div>post 1</div><div>post 2</div>" == compile(@smart, [posts: posts])
+  end
+
 end
