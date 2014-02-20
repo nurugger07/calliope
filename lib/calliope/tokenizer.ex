@@ -1,9 +1,9 @@
 defmodule Calliope.Tokenizer do
 
-  @regex  %r/(?:(^[\t| ]+)|(\/\s)|(\/\[\w+])|([%.#][-:\w]+)|([{(].+?[)}])|(.+))\s*/
+  @regex  ~r/(?:(^[\t| ]+)|(\/\s)|(\/\[\w+])|([%.#][-:\w]+)|([{(].+?[)}])|(.+))\s*/
 
   def tokenize(haml) when is_binary(haml) do
-    Regex.split(%r/\n/, haml) |> tokenize |> filter |> tokenize_identation
+    Regex.split(~r/\n/, haml) |> tokenize |> filter |> tokenize_identation
   end
 
   def tokenize([]), do: []
@@ -22,7 +22,7 @@ defmodule Calliope.Tokenizer do
   def tokenize_identation([h|t], spacing) do
     [head|tail] = h
     new_head = cond do
-      Regex.match?(%r/^ +$/, head) -> [replace_with_tabs(head, spacing)] ++ tail
+      Regex.match?(~r/^ +$/, head) -> [replace_with_tabs(head, spacing)] ++ tail
       true -> h
     end
 
@@ -37,7 +37,7 @@ defmodule Calliope.Tokenizer do
   def compute_tabs([h|t]) do
     [head|_] = h
     cond do
-      Regex.match?(%r/^ +$/, head) -> String.length head
+      Regex.match?(~r/^ +$/, head) -> String.length head
       true -> compute_tabs(t)
     end
   end

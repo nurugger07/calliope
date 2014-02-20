@@ -10,6 +10,7 @@ defmodule Calliope.Parser do
   @parens   "("
   @comment  "/"
   @script   "="
+  @smart    "-"
 
   def parse([]), do: []
   def parse(l) do
@@ -20,7 +21,7 @@ defmodule Calliope.Parser do
   def parse_lines([h|t]), do: [parse_line(h)|parse_lines(t)]
 
   def parse_line([], acc), do: acc
-  def parse_line([h|t], acc//[]) do
+  def parse_line([h|t], acc\\[]) do
     [sym, val] = [head(h), tail(h)]
     acc = case sym do
       @doctype  -> acc ++ [ doctype: h ]
@@ -32,6 +33,7 @@ defmodule Calliope.Parser do
       @parens   -> merge_attributes( acc, val)
       @comment  -> acc ++ handle_comment(val)
       @script   -> acc ++ [ script: val ]
+      @smart    -> acc ++ [ smart_script: String.strip(val) ]
       _         -> acc ++ [ content: String.strip(h) ]
     end
     parse_line(t, acc)
@@ -66,7 +68,7 @@ defmodule Calliope.Parser do
   end
 
   def extract(key, str) do
-    case Regex.run(%r/#{key}[=:]\s?['"](.*)['"]/r, str) do
+    case Regex.run(~r/#{key}[=:]\s?['"](.*)['"]/r, str) do
       [ _, match | _ ] -> String.split match
       _ -> []
     end
@@ -74,11 +76,11 @@ defmodule Calliope.Parser do
 
   def build_attributes(value) do
     String.slice(value, 0, String.length(value)-1) |>
-      String.replace(%r/class[=:]\s?['"](.*)['"]/r, "") |>
-      String.replace(%r/id[=:]\s?['"](.*)['"]/r, "") |>
-      String.replace(%r/:\s(['"])/, "=\\1") |>
-      String.replace(%r/:\s(\w+)\s?/, "='\#{\\1}'") |>
-      String.replace(%r/,\s?/, " ") |>
+      String.replace(~r/class[=:]\s?['"](.*)['"]/r, "") |>
+      String.replace(~r/id[=:]\s?['"](.*)['"]/r, "") |>
+      String.replace(~r/:\s(['"])/, "=\\1") |>
+      String.replace(~r/:\s(\w+)\s?/, "='\#{\\1}'") |>
+      String.replace(~r/,\s?/, " ") |>
       String.strip
   end
 

@@ -3,6 +3,8 @@ defmodule Calliope.Compiler do
   @attributes   [ :id, :classes, :attributes ]
   @self_closing [ "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr" ]
 
+  @lc ~r/^(.*)do:?(.*)$/
+
   @doctypes [
     { :"!!!", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" },
     { :"!!! 5", "<!DOCTYPE html>" },
@@ -16,27 +18,50 @@ defmodule Calliope.Compiler do
 
   def compile([], _), do: ""
   def compile(nil, _), do: ""
-  def compile([h|t], args//[]) do
-    comment(h[:comment], :open) <>
-      open(compile_attributes(h, args), tag(h)) <>
-        evaluate_content("#{h[:content]}", args) <>
-        evaluate_script(h[:script], args) <>
-        compile(h[:children], args) <>
-      close(tag(h)) <>
-    comment(h[:comment], :close) <>
-    compile(t, args)
+  def compile([h|t], args\\[]) do
+    haml = cond do
+      h[:smart_script] -> evaluate_smart_script(h[:smart_script], h[:children], args)
+      true -> evaluate(h, args)
+    end
+    haml <> compile(t, args)
+  end
+
+  def evaluate(line, args) do
+    comment(line[:comment], :open) <>
+      open(compile_attributes(line, args), tag(line)) <>
+        evaluate_content("#{line[:content]}", args) <>
+        evaluate_script(line[:script], args) <>
+        compile(line[:children], args) <>
+      close(tag(line)) <>
+    comment(line[:comment], :close)
+  end
+
+  def evaluate_smart_script(script, children, args) do
+    { { :ok, result }, _ } = compile_quoted(script, children) |> Code.eval_quoted(args)
+    Enum.join(result)
   end
 
   def evaluate_script(nil, _), do: ""
+  def evaluate_script(script, []), do: "\#{#{script}}"
   def evaluate_script(script, args) do
     {result, _} = Code.eval_string(script, args)
     result
   end
 
-  def evaluate_content(nil, _), do: ""
+  defp compile_quoted(<< "lc", script :: binary>>, children) do
+    [ _, cmd, inline, _ ] = Regex.split(@lc, script)
+    Code.string_to_quoted """
+      lc #{cmd} do
+        #{inline}
+        "#{compile(children)}"
+      end
+    """
+  end
+
+  def evaluate_content(nil, _), do: nil
   def evaluate_content(content, []), do: content
-  def evaluate_content(content, args//[]) do
-    Regex.scan(%r/\#{(.+)}/r, content) |>
+  def evaluate_content(content, args\\[]) do
+    Regex.scan(~r/\#{(.+)}/r, content) |>
       map_content_to_args(content, args)
   end
 
