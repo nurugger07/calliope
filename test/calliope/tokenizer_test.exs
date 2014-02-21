@@ -20,6 +20,14 @@ defmodule CalliopeTokenizerTest do
     = content
 """
 
+  @haml_with_haml_comments """
+%p foo
+  -# This would
+    Not be
+    output
+%p bar
+"""
+
   test :tokenize_inline_haml do
     inline = "%div Hello Calliope"
     assert [["%div","Hello Calliope"]] == tokenize(inline)
@@ -44,6 +52,14 @@ defmodule CalliopeTokenizerTest do
       ["\t", "%div"],
       ["\t\t", "= content"]
       ] == tokenize(@haml_with_collection)
+
+    assert [
+      ["%p", "foo"],
+      ["\t", "-# This would"],
+      ["\t\t", "Not be"],
+      ["\t\t", "output"],
+      ["%p", "bar"]
+      ] == tokenize(@haml_with_haml_comments)
   end
 
   test :tokenize_line do

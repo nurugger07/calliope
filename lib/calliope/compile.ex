@@ -36,6 +36,7 @@ defmodule Calliope.Compiler do
     comment(line[:comment], :close)
   end
 
+  def evaluate_smart_script(<< "#", _ :: binary >>, _, _), do: ""
   def evaluate_smart_script(script, children, args) do
     { { :ok, result }, _ } = compile_quoted(script, children) |> Code.eval_quoted(args)
     Enum.join(result)

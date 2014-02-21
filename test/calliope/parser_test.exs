@@ -58,6 +58,29 @@ defmodule CalliopeParserTest do
       ]
     ]
 
+  @tokens_with_haml_comment [
+      ["%p", "foo"],
+      ["\t", "-# This would"],
+      ["\t\t", "Not be"],
+      ["\t\t", "output"],
+      ["%p", "bar"]
+    ]
+  @parsed_with_haml_comment [
+      [ tag: "p", content: "foo", children: [
+          [ indent: 1, smart_script: "# This would", children: [
+              [ indent: 2, content: "Not be"],
+              [ indent: 2, content: "output"]
+            ],
+          ]
+        ]
+      ],
+      [ tag: "p", content: "bar"]
+    ]
+
+  test :parse do
+    assert @parsed_with_haml_comment == parse @tokens_with_haml_comment
+  end
+
   test :parse_line do
     assert parsed_tokens(0) == parsed_line_tokens(tokens(0))
     assert parsed_tokens(1) == parsed_line_tokens(tokens(1))

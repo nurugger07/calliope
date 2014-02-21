@@ -51,6 +51,18 @@ defmodule CalliopeCompilerTest do
               [indent: 1, tag: "div", children: [[indent: 2, script: "content"]]]
             ]]]
 
+  @smart_haml_comments [
+      [ tag: "p", content: "foo", children: [
+          [ indent: 1, smart_script: "# This would", children: [
+              [ indent: 2, content: "Not be"],
+              [ indent: 2, content: "output"]
+            ],
+          ]
+        ]
+      ],
+      [ tag: "p", content: "bar"]
+    ]
+
   test :evaluate_content do
     assert "Hello Johnny" == evaluate_content("Hello \#{name}", [name: "Johnny"])
   end
@@ -119,6 +131,7 @@ defmodule CalliopeCompilerTest do
     assert "<div>post 1</div><div>post 2</div>" == evaluate_smart_script("lc { id, content } inlist posts do", children, [posts: posts])
 
     assert "<div>post 1</div><div>post 2</div>" == compile(@smart, [posts: posts])
+    assert "<p>foo</p><p>bar</p>" == compile(@smart_haml_comments)
   end
 
 end
