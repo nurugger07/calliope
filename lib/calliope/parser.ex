@@ -14,7 +14,7 @@ defmodule Calliope.Parser do
 
   def parse([]), do: []
   def parse(l) do
-    build_tree(parse_lines(l))
+    parse_lines(l) |> build_tree
   end
 
   def parse_lines([]), do: []
