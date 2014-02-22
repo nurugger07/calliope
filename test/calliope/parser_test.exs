@@ -4,77 +4,78 @@ defmodule CalliopeParserTest do
   import Calliope.Parser
 
   @tokens [
-      ["!!! 5"],
-      ["%section", ".container", ".blue"],
-      ["\t", "%h1", "Calliope"],
-      ["\t", "/", "%h1", "An important inline comment"],
-      ["\t", "/[if IE]"],
-      ["\t\t", "%h2", "An Elixir Haml Parser"],
-      ["\t", "#main", ".content"],
-      ["\t\t", "- lc { arg } inlist args do"],
-      ["\t\t\t", "= arg"],
-      ["\t\t", " Welcome to \#{title}"],
-      ["%section", ".container", "(data-a: 'calliope', data-b: 'awesome')"],
-      ["\t", "%img", ".one", "{id: 'main_image', class: 'two three', src: url}"],
+      [1, "!!! 5"],
+      [2, "%section", ".container", ".blue"],
+      [3, "\t", "%h1", "Calliope"],
+      [4, "\t", "/", "%h1", "An important inline comment"],
+      [5, "\t", "/[if IE]"],
+      [6, "\t\t", "%h2", "An Elixir Haml Parser"],
+      [7, "\t", "#main", ".content"],
+      [8, "\t\t", "- lc { arg } inlist args do"],
+      [9, "\t\t\t", "= arg"],
+      [10, "\t\t", " Welcome to \#{title}"],
+      [11, "%section", ".container", "(data-a: 'calliope', data-b: 'awesome')"],
+      [12, "\t", "%img", ".one", "{id: 'main_image', class: 'two three', src: url}"],
     ]
 
   @parsed_tokens [
-      [ doctype: "!!! 5" ],
-      [ tag: "section", classes: ["container", "blue"] ],
-      [ indent: 1, tag: "h1", content: "Calliope" ],
-      [ indent: 1, comment: "!--", tag: "h1", content: "An important inline comment" ],
-      [ indent: 1, comment: "!--[if IE]" ],
-      [ indent: 2, tag: "h2", content: "An Elixir Haml Parser" ],
-      [ indent: 1, id: "main", classes: ["content"] ],
-      [ indent: 2, smart_script: "lc { arg } inlist args do" ],
-      [ indent: 3, script: " arg" ],
-      [ indent: 2, content: "Welcome to \#{title}" ],
-      [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'" ],
-      [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'" ]
+      [ doctype: "!!! 5", line_number: 1],
+      [ tag: "section", classes: ["container", "blue"] , line_number: 2],
+      [ indent: 1, tag: "h1", content: "Calliope", line_number: 3 ],
+      [ indent: 1, comment: "!--", tag: "h1", content: "An important inline comment", line_number: 4 ],
+      [ indent: 1, comment: "!--[if IE]", line_number: 5 ],
+      [ indent: 2, tag: "h2", content: "An Elixir Haml Parser", line_number: 6 ],
+      [ indent: 1, id: "main", classes: ["content"], line_number: 7 ],
+      [ indent: 2, smart_script: "lc { arg } inlist args do", line_number: 8 ],
+      [ indent: 3, script: " arg", line_number: 9 ],
+      [ indent: 2, content: "Welcome to \#{title}", line_number: 10 ],
+      [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'", line_number: 11 ],
+      [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'", line_number: 12 ]
     ]
 
   @nested_tree [
-      [ doctype: "!!! 5" ],
-      [ tag: "section", classes: ["container", "blue"], children: [
-          [ indent: 1, tag: "h1", content: "Calliope" ],
-          [ indent: 1, comment: "!--", tag: "h1", content: "An important inline comment" ],
-          [ indent: 1, comment: "!--[if IE]", children: [
-              [ indent: 2, tag: "h2",content: "An Elixir Haml Parser"]
+      [ doctype: "!!! 5", line_number: 1],
+      [ tag: "section", classes: ["container", "blue"], line_number: 2, children: [
+          [ indent: 1, tag: "h1", content: "Calliope", line_number: 3 ],
+          [ indent: 1, comment: "!--", tag: "h1", content: "An important inline comment", line_number: 4 ],
+          [ indent: 1, comment: "!--[if IE]", line_number: 5, children: [
+              [ indent: 2, tag: "h2",content: "An Elixir Haml Parser", line_number: 6]
             ]
           ],
-          [ indent: 1, id: "main", classes: ["content"], children: [
-              [ indent: 2, smart_script: "lc { arg } inlist args do", children: [
-                  [ indent: 3, script: " arg" ]
+          [ indent: 1, id: "main", classes: ["content"], line_number: 7, children: [
+              [ indent: 2, smart_script: "lc { arg } inlist args do", line_number: 8, children: [
+                  [ indent: 3, script: " arg", line_number: 9 ]
                 ]
               ],
-              [ indent: 2, content: "Welcome to \#{title}" ]
+              [ indent: 2, content: "Welcome to \#{title}", line_number: 10 ]
             ]
           ],
         ],
       ],
-      [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'",children: [
-          [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'"]
+      [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'", line_number: 11, children: [
+          [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'", line_number: 12]
         ]
       ]
     ]
 
   @tokens_with_haml_comment [
-      ["%p", "foo"],
-      ["\t", "-# This would"],
-      ["\t\t", "Not be"],
-      ["\t\t", "output"],
-      ["%p", "bar"]
+      [1, "%p", "foo"],
+      [2, "\t", "-# This would"],
+      [3, "\t\t", "Not be"],
+      [4, "\t\t", "output"],
+      [5, "%p", "bar"]
     ]
+
   @parsed_with_haml_comment [
-      [ tag: "p", content: "foo", children: [
-          [ indent: 1, smart_script: "# This would", children: [
-              [ indent: 2, content: "Not be"],
-              [ indent: 2, content: "output"]
+      [ line_number: 1, tag: "p", content: "foo", children: [
+          [ line_number: 2, indent: 1, smart_script: "# This would", children: [
+              [ line_number: 3, indent: 2, content: "Not be"],
+              [ line_number: 4, indent: 2, content: "output"]
             ],
           ]
         ]
       ],
-      [ tag: "p", content: "bar"]
+      [ line_number: 5, tag: "p", content: "bar"]
     ]
 
   test :parse do
