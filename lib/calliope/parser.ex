@@ -29,7 +29,7 @@ defmodule Calliope.Parser do
     acc = case sym do
       @doctype  -> acc ++ [ doctype: h ]
       @tag      -> acc ++ [ tag: val ]
-      @id       -> acc ++ [ id: val ]
+      @id       -> handle_id(acc, val)
       @class    -> merge_into(:classes, acc, [val])
       @tab      -> acc ++ [ indent: String.length(h) ]
       @attrs    -> merge_attributes( acc, val)
@@ -42,7 +42,14 @@ defmodule Calliope.Parser do
     parse_line(t, acc)
   end
 
- def handle_comment(val), do: [ comment: String.rstrip "!--#{val}" ]
+  def handle_comment(val), do: [ comment: String.rstrip "!--#{val}" ]
+  def handle_id(line, id) do
+    cond do
+      line[:id] -> 
+        raise CalliopeException, error: :multiple_ids_assigned, line: line[:line_number]
+      true -> line ++ [ id: id ]
+    end
+  end
 
   def build_tree([]), do: []
   def build_tree([h|t]) do

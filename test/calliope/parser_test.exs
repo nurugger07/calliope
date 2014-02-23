@@ -105,6 +105,13 @@ defmodule CalliopeParserTest do
     assert "src='\#{url}'" == build_attributes("src: url }")
   end
 
+  test :haml_exceptions do
+    msg = "tag id is assigned multiple times on line number 1"
+    assert_raise CalliopeException, msg, fn() ->
+      parse([[1, "#main", "#another_id"]])
+    end
+  end
+
   defp tokens(n), do: line(@tokens, n)
 
   defp parsed_tokens(n), do: Enum.sort line(@parsed_tokens, n)
