@@ -14,7 +14,7 @@ defmodule Calliope.Parser do
 
   def parse([]), do: []
   def parse(l) do
-    parse_lines(l) |> build_tree
+    parse_lines(l) |> validations |> build_tree
   end
 
   def parse_lines([]), do: []
@@ -46,9 +46,19 @@ defmodule Calliope.Parser do
   def handle_id(line, id) do
     cond do
       line[:id] -> 
-        raise CalliopeException, error: :multiple_ids_assigned, line: line[:line_number]
+        raise_error :multiple_ids_assigned, line[:line_number]
       true -> line ++ [ id: id ]
     end
+  end
+
+  def build_attributes(value) do
+    String.slice(value, 0, String.length(value)-1) |>
+      String.replace(~r/class[=:]\s?['"](.*)['"]/r, "") |>
+      String.replace(~r/id[=:]\s?['"](.*)['"]/r, "") |>
+      String.replace(~r/:\s(['"])/, "=\\1") |>
+      String.replace(~r/:\s(\w+)\s?/, "='\#{\\1}'") |>
+      String.replace(~r/,\s?/, " ") |>
+      String.strip
   end
 
   def build_tree([]), do: []
@@ -69,7 +79,7 @@ defmodule Calliope.Parser do
     Keyword.get(token1, :indent, 0) > Keyword.get(token2, :indent, 0)
   end
 
-  def merge_attributes(list, value) do
+  defp merge_attributes(list, value) do
     classes = extract(:class, value)
     id = extract(:id, value)
     attributes = build_attributes(value)
@@ -77,21 +87,11 @@ defmodule Calliope.Parser do
     merge_into(:classes, merge_into(:id, list, id), classes) ++ [attributes: attributes ]
   end
 
-  def extract(key, str) do
+  defp extract(key, str) do
     case Regex.run(~r/#{key}[=:]\s?['"](.*)['"]/r, str) do
       [ _, match | _ ] -> String.split match
       _ -> []
     end
-  end
-
-  def build_attributes(value) do
-    String.slice(value, 0, String.length(value)-1) |>
-      String.replace(~r/class[=:]\s?['"](.*)['"]/r, "") |>
-      String.replace(~r/id[=:]\s?['"](.*)['"]/r, "") |>
-      String.replace(~r/:\s(['"])/, "=\\1") |>
-      String.replace(~r/:\s(\w+)\s?/, "='\#{\\1}'") |>
-      String.replace(~r/,\s?/, " ") |>
-      String.strip
   end
 
   defp merge_into(:id, list, []), do: list
@@ -108,4 +108,24 @@ defmodule Calliope.Parser do
 
   defp head(str), do: String.first(str)
   defp tail(str), do: String.slice(str, 1..-1)
+
+  defp validations([]), do: []
+  defp validations([h|t]) do
+    next = List.first(t)
+    cond do
+      invalid_indentation?(h, next) -> raise_error(:too_deep_indent, next[:line_number])
+      true -> [h] ++ validations(t)
+    end
+  end
+
+  defp invalid_indentation?(parent, child) do
+    parent = Keyword.get(parent, :indent, 0)
+    child = Keyword.get(child, :indent, 0)
+    cond do
+      parent == child -> false
+      parent + 1 > child -> true
+    end
+  end
+
+  defp raise_error(error, line), do: raise(CalliopeException, error: error, line: line)
 end
