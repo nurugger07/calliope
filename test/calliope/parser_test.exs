@@ -110,6 +110,13 @@ defmodule CalliopeParserTest do
     assert_raise CalliopeException, msg, fn() ->
       parse([[1, "#main", "#another_id"]])
     end
+
+    msg = "tag is indented at wrong level on line number: #"
+    assert_raise CalliopeException, msg, fn() ->
+      parse([[1, "#main"],
+             [2, "\t\t\t", "%h1", "Calliope"], 
+             [3, "\t\t", "%h2", "Bad Indent" ]])
+    end
   end
 
   defp tokens(n), do: line(@tokens, n)
