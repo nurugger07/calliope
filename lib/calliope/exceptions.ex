@@ -2,7 +2,7 @@ defexception CalliopeException, [:message] do
 
   def messages do
     [
-      bad_script_indent:      "tag is indented at wrong level on line number: #",
+      too_deep_indent:        "Indentation was too deep on line number: #",
       multiple_ids_assigned:  "tag id is assigned multiple times on line number #",
       unknown:                "Something wicked this way comes"
     ]
