@@ -1,5 +1,7 @@
 defmodule Calliope.Compiler do
 
+  alias Calliope.Safe
+
   @attributes   [ :id, :classes, :attributes ]
   @self_closing [ "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr" ]
 
@@ -38,25 +40,23 @@ defmodule Calliope.Compiler do
 
   def evaluate_smart_script(<< "#", _ :: binary >>, _, _), do: ""
   def evaluate_smart_script(script, children, args) do
-    { { :ok, result }, _ } = compile_quoted(script, children) |> Code.eval_quoted(args)
-    Enum.join(result)
+    smart_script_to_string(script, children) |> Safe.eval_safe_script(args) |> Enum.join
   end
 
   def evaluate_script(nil, _), do: ""
   def evaluate_script(script, []), do: "\#{#{script}}"
   def evaluate_script(script, args) do
-    {result, _} = Code.eval_string(script, args)
-    result
+    Safe.eval_safe_script(script, args)
   end
 
-  defp compile_quoted(<< "lc", script :: binary>>, children) do
+  defp smart_script_to_string(<< "lc", script :: binary>>, children) do
     [ _, cmd, inline, _ ] = Regex.split(@lc, script)
-    Code.string_to_quoted """
-      lc #{cmd} do
+    """
+      Safe.script(lc #{cmd} do
         #{inline}
         "#{compile(children)}"
-      end
-    """
+      end)
+    """ |> String.strip
   end
 
   def evaluate_content(nil, _), do: nil
