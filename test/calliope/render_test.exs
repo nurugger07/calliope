@@ -44,4 +44,9 @@ defmodule CalliopeRenderTest do
     file = File.read!("test/fixtures/list_comprehension_example.haml")
     assert "<div>post 1</div><div>post 2</div>" == render file, [posts: [{ 1, "post 1" }, { 2, "post 2" }]]
   end
+
+  test :render_html_safe do
+    assert "<div>&lt;script&rt;a bad script&lt;/script&rt;</div>" ==
+      render "%div= bad_script", [ bad_script: "<script>a bad script</script>" ]
+  end
 end
