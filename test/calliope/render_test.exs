@@ -48,5 +48,7 @@ defmodule CalliopeRenderTest do
   test :render_html_safe do
     assert "<div>&lt;script&rt;a bad script&lt;/script&rt;</div>" ==
       render "%div= bad_script", [ bad_script: "<script>a bad script</script>" ]
+    assert "<div><script>a good script</script></div>" ==
+      render "%div= Safe.script(good_script)", [ good_script: "<script>a good script</script>" ]
   end
 end

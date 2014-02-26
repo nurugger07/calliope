@@ -46,7 +46,7 @@ defmodule Calliope.Compiler do
   def evaluate_script(nil, _), do: ""
   def evaluate_script(script, []), do: "\#{#{script}}"
   def evaluate_script(script, args) do
-    Safe.eval_safe_script(script, args)
+    String.strip(script) |> Safe.eval_safe_script(args)
   end
 
   defp smart_script_to_string(<< "lc", script :: binary>>, children) do
