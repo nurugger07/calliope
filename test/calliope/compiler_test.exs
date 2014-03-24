@@ -32,7 +32,7 @@ defmodule CalliopeCompilerTest do
     <!DOCTYPE html>
     <section class="container">
       <h1>
-        Calliope
+        <%= arg %>
       </h1>
       <!-- <h1>An important inline comment</h1> -->
       <!--[if IE]> <h2>An Elixir Haml Parser</h2> <![endif]-->
@@ -63,15 +63,15 @@ defmodule CalliopeCompilerTest do
       [ tag: "p", content: "bar"]
     ]
 
-  test :evaluate_content do
-    assert "Hello Johnny" == evaluate_content("Hello \#{name}", [name: "Johnny"])
+  test :precompile_content do
+    assert "Hello <%= name %>" == precompile_content("Hello \#{name}")
   end
 
   test :compile_attributes do
     assert " id=\"foo\" class=\"bar baz\"" ==
-      compile_attributes([ id: "foo", classes: ["bar", "baz"] ], [])
-    assert " class=\"bar\"" ==  compile_attributes([ classes: ["bar"] ], [])
-    assert " id=\"foo\"" ==  compile_attributes([ id: "foo"], [])
+      compile_attributes([ id: "foo", classes: ["bar", "baz"] ])
+    assert " class=\"bar\"" ==  compile_attributes([ classes: ["bar"] ])
+    assert " id=\"foo\"" ==  compile_attributes([ id: "foo"])
   end
 
   test :compile_key do
@@ -118,20 +118,26 @@ defmodule CalliopeCompilerTest do
 
      assert ~s{content} == compile([[content: "content"]])
 
-     assert @html == compile(@ast, [arg: "Calliope"])
+     assert @html == compile(@ast)
   end
 
-  test :evaluate_multi_script do
-    children = [[ indent: 1, tag: "h1", children: [[ indent: 2, script: "greet"]]]]
-    assert "<h1>Hello</h1><h1>Hi</h1>" ==
-      evaluate_smart_script("lc greet inlist greetings do", children, [greetings: ["Hello", "Hi"]])
+  test :compile_with_multiline_script do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <h1>Calliope</h1>
+      <%= lc a inlist b do %>
+        <div><%= a %></div>
+      <%= end %>}, "")
 
-    children = [[indent: 1, tag: "div", children: [[indent: 2, script: " content"]]]]
-    posts = [{1, "post 1"}, {2, "post 2"}]
-    assert "<div>post 1</div><div>post 2</div>" == evaluate_smart_script("lc { id, content } inlist posts do", children, [posts: posts])
+    parsed_tokens = [
+      [ indent: 1, tag: "h1", content: "Calliope"],
+      [ indent: 1, smart_script: "lc a inlist b do", children: [
+          [ indent: 2, tag: "div", script: "a"]
+        ]
+      ]
+    ]
 
-    assert "<div>post 1</div><div>post 2</div>" == compile(@smart, [posts: posts])
-    assert "<p>foo</p><p>bar</p>" == compile(@smart_haml_comments)
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
   end
-
 end

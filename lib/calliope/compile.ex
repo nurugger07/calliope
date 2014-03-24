@@ -1,7 +1,5 @@
 defmodule Calliope.Compiler do
 
-  alias Calliope.Safe
-
   @attributes   [ :id, :classes, :attributes ]
   @self_closing [ "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr" ]
 
@@ -18,57 +16,56 @@ defmodule Calliope.Compiler do
     { :"!!! RDFa", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML+RDFa 1.0//EN\" \"http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd\">" }
   ]
 
-  def compile([], _), do: ""
-  def compile(nil, _), do: ""
-  def compile([h|t], args\\[]) do
-    haml = cond do
-      h[:smart_script] -> evaluate_smart_script(h[:smart_script], h[:children], args)
-      true -> evaluate(h, args)
-    end
-    haml <> compile(t, args)
+  def compile([]), do: ""
+  def compile(nil), do: ""
+  def compile([h|t]) do
+    build_html(h) <> compile(t)
   end
 
-  def evaluate(line, args) do
+  defp build_html(node) do
+    html = cond do
+      node[:smart_script] -> evaluate_smart_script(node[:smart_script], node[:children])
+      true -> evaluate(node)
+    end
+  end
+
+  def evaluate(line) do
     comment(line[:comment], :open) <>
-      open(compile_attributes(line, args), tag(line)) <>
-        evaluate_content("#{line[:content]}", args) <>
-        evaluate_script(line[:script], args) <>
-        compile(line[:children], args) <>
+      open(compile_attributes(line), tag(line)) <>
+        precompile_content("#{line[:content]}") <>
+        evaluate_script(line[:script]) <>
+        compile(line[:children]) <>
       close(tag(line)) <>
     comment(line[:comment], :close)
   end
 
   def evaluate_smart_script(<< "#", _ :: binary >>, _, _), do: ""
-  def evaluate_smart_script(script, children, args) do
-    smart_script_to_string(script, children) |> Safe.eval_safe_script(args) |> Enum.join
+  def evaluate_smart_script(script, children) do
+    smart_script_to_string(script, children)
   end
 
-  def evaluate_script(nil, _), do: ""
-  def evaluate_script(script, []), do: "\#{#{script}}"
-  def evaluate_script(script, args) do
-    String.strip(script) |> Safe.eval_safe_script(args)
-  end
+  def evaluate_script(nil), do: ""
+  def evaluate_script(script) when is_binary(script), do: "<%= #{String.lstrip(script)} %>"
 
   defp smart_script_to_string(<< "lc", script :: binary>>, children) do
     [ _, cmd, inline, _ ] = Regex.split(@lc, script)
     """
-      Safe.script(lc #{cmd} do
+      <%= lc#{cmd}do %>
         #{inline}
-        "#{compile(children)}"
-      end)
+        #{compile(children)}
+      <%= end %>
     """ |> String.strip
   end
 
-  def evaluate_content(nil, _), do: nil
-  def evaluate_content(content, []), do: content
-  def evaluate_content(content, args\\[]) do
-    Regex.scan(~r/\#{(.+)}/r, content) |>
-      map_content_to_args(content, args)
+  def precompile_content(nil), do: nil
+  def precompile_content(content) do
+    Regex.scan(~r/\#{(.+)}/r, content) |> 
+      map_content_to_args(content)
   end
 
-  defp map_content_to_args([], content, _), do: content
-  defp map_content_to_args([[key, val]|t], content, args) do
-    map_content_to_args(t, String.replace(content, key, evaluate_script(val, args)), args)
+  defp map_content_to_args([], content), do: content
+  defp map_content_to_args([[key, val]|t], content) do
+    map_content_to_args(t, String.replace(content, key, "<%= #{val} %>"))
   end
 
   def comment(nil, _), do: ""
@@ -87,13 +84,9 @@ defmodule Calliope.Compiler do
   def close(tag_value) when tag_value in @self_closing, do: ""
   def close(tag_value), do: "</#{tag_value}>"
 
-  def compile_attributes(list, []) do
+  def compile_attributes(list) do
     Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1])) |>
-      String.rstrip
-  end
-  def compile_attributes(list, args) do
-    Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1])) |>
-      evaluate_content(args) |>
+      precompile_content |>
       String.rstrip
   end
 

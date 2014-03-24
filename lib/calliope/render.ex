@@ -7,7 +7,7 @@ defmodule Calliope.Render do
       import Calliope.Parser
       import Calliope.Compiler
 
-      def render(haml, args\\[]), do: tokenize(haml) |> parse |> compile(args)
+      def render(haml, args\\[]), do: tokenize(haml) |> parse |> compile
     end
   end
 end
