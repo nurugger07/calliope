@@ -31,13 +31,18 @@ defmodule CalliopeRenderTest do
   @haml_with_args "%a{href: url}= title"
 
   test :render do
-    assert @html == render @haml, 
+    assert @html == render @haml
     assert "<h1>This is <%= title %></h1>" == render "%h1 This is \#{title}"
   end
 
   test :render_with_params do
     assert "<a href='<%= url %>'><%= title %></a>" ==
       render @haml_with_args
+  end
+
+  test :render_with_args do
+    assert "<a href='http://google.com'>Google</a>" ==
+      render @haml_with_args, [ url: "http://google.com", title: "Google" ]
   end
 
 end

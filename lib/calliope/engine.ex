@@ -1,0 +1,86 @@
+defmodule Calliope.Engine do
+
+  import Calliope.Render
+
+  @doc """
+  The Calliope Engine allows you to precompile your haml templates to be accessed
+  through functions at runtime. 
+
+  Example:
+
+  defmodule Simple do
+
+    use Calliope.Engine
+
+    def show do
+      content_for(:show, [title: Calliope])
+    end
+
+  end
+
+  The configure options are:
+
+  `:path` - provides the root path. The default is the current working directory.
+  `:templates` - used to define where the templates are stored.
+  `:alias` - used to set the directory where the templates are located. The
+             default value is 'templates'.
+
+  """
+
+  defmacro __using__(opts \\ []) do
+    dir = Keyword.get(opts, :alias, "templates")
+    templates = Keyword.get(opts, :templates, nil)
+    root = Keyword.get(opts, :path, File.cwd!)
+
+    path = Enum.filter([root, templates, dir], fn(x) -> is_binary x end) |>
+        Enum.join "/"
+    quote do
+      import unquote(__MODULE__)
+
+      use Calliope.Render
+
+      compile_templates unquote(path)
+    end
+  end
+
+  defmacro compile_templates(path) do
+    path = eval_path(path)
+    quote do: unquote files_for(path) |> haml_views |> view_to_function(path)
+  end
+
+  def eval_path(path) do
+    { path, _ } = Code.eval_quoted path
+    path
+  end
+
+  def files_for(nil), do: []
+  def files_for(path) do
+    { _, files } = File.ls path
+    files
+  end
+
+  def haml_views(files) do
+    Enum.filter(files, fn(v) -> Regex.match?(~r{^\w*\.html\.haml$}, v) end)
+  end
+
+  def precompile_view(path), do: File.read!(path) |> precompile
+
+  def view_to_function([], _), do: ""
+  def view_to_function([view|t], path) do
+    [ name, _, _ ] = String.split(view, ".")
+
+    content = precompile_view path <> "/" <> view
+
+    quote do
+      def content_for(unquote(binary_to_atom name), args) do
+        Calliope.Render.eval unquote(content), args
+      end
+      def content_for(unquote(name), args) do
+        Calliope.Render.eval unquote(content), args
+      end
+
+      unquote(view_to_function(t, path))
+    end
+  end
+
+end

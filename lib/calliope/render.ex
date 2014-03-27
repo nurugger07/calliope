@@ -1,4 +1,15 @@
 defmodule Calliope.Render do
+  import Calliope.Tokenizer
+  import Calliope.Parser
+  import Calliope.Compiler
+  import Calliope.Safe
+
+  def precompile(haml) do
+    tokenize(haml) |> parse |> compile
+  end
+
+  def eval(html, []), do: html
+  def eval(html, args), do: EEx.eval_string(html, args)
 
   defmacro __using__([]) do
     quote do
@@ -6,8 +17,14 @@ defmodule Calliope.Render do
       import Calliope.Tokenizer
       import Calliope.Parser
       import Calliope.Compiler
+      import Calliope.Safe
 
-      def render(haml, args\\[]), do: tokenize(haml) |> parse |> compile
+      require EEx
+
+      def render(haml, args \\ []) do
+        precompile(haml) |> eval(args)
+      end
+
     end
   end
 end
