@@ -4,7 +4,7 @@ defmodule Calliope.Engine do
 
   @doc """
   The Calliope Engine allows you to precompile your haml templates to be accessed
-  through functions at runtime. 
+  through functions at runtime.
 
   Example:
 
@@ -47,8 +47,8 @@ defmodule Calliope.Engine do
 
       compile_templates unquote(path)
 
-      def layout_for(content, args) do
-        content_for unquote(layout), [ yield: content ]
+      def layout_for(content, args\\[]) do
+        content_for unquote(layout), [ yield: content ] ++ args
       end
 
       def content_with_layout(name, args) do
