@@ -24,6 +24,8 @@ defmodule Calliope.Engine do
   `:templates` - used to define where the templates are stored.
   `:alias` - used to set the directory where the templates are located. The
              default value is 'templates'.
+  `:layout` - the layout to use for templates. The default is `:none` or you can pass in
+             the name of a layout.
 
   """
 
@@ -31,14 +33,37 @@ defmodule Calliope.Engine do
     dir = Keyword.get(opts, :alias, "templates")
     templates = Keyword.get(opts, :templates, nil)
     root = Keyword.get(opts, :path, File.cwd!)
+    layout = Keyword.get(opts, :layout, :none)
 
-    path = Enum.filter([root, templates, dir], fn(x) -> is_binary x end) |>
-        Enum.join "/"
+    path = build_path_for [root, templates, dir]
+    layout_path = build_path_for [root, templates, "layouts"]
+
     quote do
       import unquote(__MODULE__)
 
       use Calliope.Render
 
+      compile_layout unquote(layout), unquote(layout_path)
+
+      compile_templates unquote(path)
+
+      def layout_for(content, args) do
+        content_for unquote(layout), [ yield: content ]
+      end
+
+      def content_with_layout(name, args) do
+        content_for(name, args) |> layout_for args
+      end
+
+      def content_for(:none, args) do
+        Keyword.get(args, :yield, "") |> Calliope.Render.eval args
+      end
+    end
+  end
+
+  defmacro compile_layout(:none, _path), do: nil
+  defmacro compile_layout(_layout, path) do
+    quote do
       compile_templates unquote(path)
     end
   end
@@ -47,6 +72,8 @@ defmodule Calliope.Engine do
     path = eval_path(path)
     quote do: unquote files_for(path) |> haml_views |> view_to_function(path)
   end
+
+  def build_path_for(list), do: Enum.filter(list, fn(x) -> is_binary x end) |> Enum.join "/"
 
   def eval_path(path) do
     { path, _ } = Code.eval_quoted path
