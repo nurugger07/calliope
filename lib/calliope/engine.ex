@@ -26,6 +26,8 @@ defmodule Calliope.Engine do
              default value is 'templates'.
   `:layout` - the layout to use for templates. The default is `:none` or you can pass in
              the name of a layout.
+  `:layout_directory` - the directory that your layouts are stored relative to the
+             templates path. The default directory is `layouts`
 
   """
 
@@ -34,9 +36,10 @@ defmodule Calliope.Engine do
     templates = Keyword.get(opts, :templates, nil)
     root = Keyword.get(opts, :path, File.cwd!)
     layout = Keyword.get(opts, :layout, :none)
+    layout_directory = Keyword.get(opts, :layout_directory, "layouts")
 
     path = build_path_for [root, templates, dir]
-    layout_path = build_path_for [root, templates, "layouts"]
+    layout_path = build_path_for [root, templates, layout_directory]
 
     quote do
       import unquote(__MODULE__)
