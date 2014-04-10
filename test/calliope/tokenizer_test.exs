@@ -32,6 +32,12 @@ defmodule CalliopeTokenizerTest do
     inline = "%div Hello Calliope"
     assert [[1, "%div","Hello Calliope"]] == tokenize(inline)
     assert [[1, "%h1", "This is \#{title}"]] == tokenize("%h1 This is \#{title}")
+
+    inline = "%a{ng-click: 'doSomething()'}Click Me"
+    assert [[1, "%a", "{ng-click: 'doSomething()'}", "Click Me"]] == tokenize inline
+
+    inline = "%h1 {{user}}"
+    assert [[1, "%h1", "{{user}}"]] == tokenize inline
   end
 
   test :tokenize_multiline_haml do

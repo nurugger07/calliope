@@ -28,11 +28,13 @@ defmodule CalliopeRenderTest do
     </section>
   }, "")
 
-  @haml_with_args "%a{href: url}= title"
+  @haml_with_args "%a{href: '#\{url}'}= title"
 
   test :render do
     assert @html == render @haml
     assert "<h1>This is <%= title %></h1>" == render "%h1 This is \#{title}"
+    assert "<a ng-click='doSomething()'>Click Me</a>" == render "%a{ng-click: 'doSomething()'} Click Me"
+    assert "<h1>{{user}}</h1>" == render "%h1 {{user}}"
   end
 
   test :render_with_params do

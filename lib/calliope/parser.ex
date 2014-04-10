@@ -78,6 +78,9 @@ defmodule Calliope.Parser do
     Keyword.get(token1, :indent, 0) > Keyword.get(token2, :indent, 0)
   end
 
+  defp merge_attributes(list, << "{", value :: binary >>) do
+    list ++ [content: "{{#{value}"]
+  end
   defp merge_attributes(list, value) do
     classes = extract(:class, value)
     id = extract(:id, value)

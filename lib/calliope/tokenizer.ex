@@ -1,6 +1,6 @@
 defmodule Calliope.Tokenizer do
 
-  @regex  ~r/(?:(^[\t| ]+)|(\/\s)|(\/\[\w+])|([%.#][-:\w]+)|([{(].+?[)}])|(.+))\s*/
+  @regex  ~r/(?:(^[\t| ]+)|(\/\s)|(\/\[\w+])|([%.#][-:\w]+)|([{(].+?['"][)}])|(.+))\s*/
 
   def tokenize(haml) when is_binary(haml) do
     Regex.split(~r/\n/, haml) |> tokenize |> filter |> tokenize_identation |> index

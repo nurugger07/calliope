@@ -82,6 +82,12 @@ defmodule CalliopeParserTest do
     assert @parsed_with_haml_comment == parse @tokens_with_haml_comment
   end
 
+  test :parse_with_special_cases do
+    handle_bars = [[1, "%h1", "{{user}}"]]
+    parsed_handle_bars = [[ line_number: 1, tag: "h1", content: "{{user}}"]]
+    assert parsed_handle_bars == parse handle_bars
+  end
+
   test :parse_line do
     assert parsed_tokens(0) == parsed_line_tokens(tokens(0))
     assert parsed_tokens(1) == parsed_line_tokens(tokens(1))
