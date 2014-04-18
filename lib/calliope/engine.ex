@@ -84,10 +84,7 @@ defmodule Calliope.Engine do
   end
 
   def files_for(nil), do: []
-  def files_for(path) do
-    { _, files } = File.ls path
-    files
-  end
+  def files_for(path), do: File.ls! path
 
   def haml_views(files) do
     Enum.filter(files, fn(v) -> Regex.match?(~r{^\w*\.html\.haml$}, v) end)
