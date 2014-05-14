@@ -145,7 +145,7 @@ defmodule CalliopeCompilerTest do
     expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
       <h1>Calliope</h1>
       <%= if a do %>
-        <p>Truthy</p>
+        <p>Truly</p>
       <%= else %>
         <p>Falsy</p>
       <%= end %>}, "")
@@ -153,7 +153,7 @@ defmodule CalliopeCompilerTest do
     parsed_tokens = [
                      [ indent: 1, tag: "h1", content: "Calliope"],
                      [line_number: 1, smart_script: "if a do",
-                      children: [[line_number: 2, indent: 2, tag: "p", content: "Truthy"]]
+                      children: [[line_number: 2, indent: 2, tag: "p", content: "Truly"]]
                      ],
                      [line_number: 3, smart_script: "else",
                          children: [[line_number: 4, indent: 2, tag: "p", content: "Falsy"]]
@@ -168,13 +168,13 @@ defmodule CalliopeCompilerTest do
     expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
       <h1>Calliope</h1>
       <%= if a do %>
-        <p>Truthy</p>
+        <p>Truly</p>
       <%= end %>}, "")
 
     parsed_tokens = [
                      [ indent: 1, tag: "h1", content: "Calliope"],
                      [line_number: 1, smart_script: "if a do",
-                      children: [[line_number: 2, indent: 2, tag: "p", content: "Truthy"]]
+                      children: [[line_number: 2, indent: 2, tag: "p", content: "Truly"]]
                      ]
                     ]
 
@@ -192,5 +192,23 @@ defmodule CalliopeCompilerTest do
                     ]
 
     catch_error compile(parsed_tokens)
+ end
+
+ test :compile_with_multiline_if_inline do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <h1>Calliope</h1>
+      <%= if a do %>
+        =hey
+      <%= end %>
+       }, "")
+
+    parsed_tokens = [
+                     [ indent: 1, tag: "h1", content: "Calliope"],
+                     [line_number: 1, smart_script: "if a, do: =hey"]
+                    ]
+
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
  end
 end

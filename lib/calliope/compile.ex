@@ -70,6 +70,13 @@ defmodule Calliope.Compiler do
 
   defp smart_script_to_string(<< "if", script :: binary>>, children) do
     [ _, cmd, inline, _ ] = Regex.split(@lc, script)
+
+    # unlike inlines for lc, if inlines are used with "," before do, e. g.:
+    # if true, do: IO.puts "Truly!"
+    # BUT
+    # lc { id, headline, content } inlist posts do
+    cmd = String.replace(cmd, ",", "")
+
     """
       <%= if#{cmd}do %>
         #{inline}
