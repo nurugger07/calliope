@@ -57,9 +57,26 @@ defmodule Calliope.Compiler do
     """ |> String.strip
   end
 
+  defp smart_script_to_string(<< "if", script :: binary>>, children) do
+    [ _, cmd, inline, _ ] = Regex.split(@lc, script)
+    """
+      <%= if#{cmd}do %>
+        #{inline}
+        #{compile(children)}
+    """ |> String.strip
+  end
+
+  defp smart_script_to_string(<< "else", _script :: binary>>, children) do
+    """
+      <%= else %>
+        #{compile(children)}
+      <%= end %>
+    """ |> String.strip
+  end
+
   def precompile_content(nil), do: nil
   def precompile_content(content) do
-    Regex.scan(~r/\#{(.+)}/r, content) |> 
+    Regex.scan(~r/\#{(.+)}/r, content) |>
       map_content_to_args(content)
   end
 
