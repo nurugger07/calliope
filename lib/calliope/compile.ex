@@ -25,7 +25,7 @@ defmodule Calliope.Compiler do
     next = compile(t)
     cond do
       String.ends_with?(prev, "<%= end %>") and String.starts_with?(next, "<%= else %>") ->
-        String.strip String.replace(prev, "<%= end %>", "") <> String.strip next
+        delete_last_line(prev) <> next
       String.starts_with?(next, "<%= else %>") ->
         raise "else is not preceded by if in template, snippet:\n #{prev <> next}"
       true ->
@@ -137,6 +137,9 @@ defmodule Calliope.Compiler do
     end
   end
 
+  defp delete_last_line(str) do
+    String.split(str, "\n") |> List.delete_at(-1) |> Enum.join("\n")
+  end
   defp has_any_key?( _, []), do: false
   defp has_any_key?(list, [h|t]), do: Keyword.has_key?(list, h) || has_any_key?(list, t)
 
