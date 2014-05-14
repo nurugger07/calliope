@@ -163,4 +163,34 @@ defmodule CalliopeCompilerTest do
 
     assert expected_results == compiled_results
   end
+
+ test :compile_with_multiline_if_only_script do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <h1>Calliope</h1>
+      <%= if a do %>
+        <p>Truthy</p>
+      <%= end %>}, "")
+
+    parsed_tokens = [
+                     [ indent: 1, tag: "h1", content: "Calliope"],
+                     [line_number: 1, smart_script: "if a do",
+                      children: [[line_number: 2, indent: 2, tag: "p", content: "Truthy"]]
+                     ]
+                    ]
+
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
+ end
+
+ test :compile_with_multiline_else_without_if do
+    parsed_tokens = [
+                     [ indent: 1, tag: "h1", content: "Calliope"],
+                     [line_number: 1, smart_script: "else",
+                      children: [[line_number: 2, indent: 2, tag: "p", content: "Truthy"]]
+                     ]
+                    ]
+
+    catch_error compile(parsed_tokens)
+ end
 end

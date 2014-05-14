@@ -19,7 +19,16 @@ defmodule Calliope.Compiler do
   def compile([]), do: ""
   def compile(nil), do: ""
   def compile([h|t]) do
-    build_html(h) <> compile(t)
+    prev = build_html(h)
+    next = compile(t)
+    cond do
+      String.ends_with?(prev, "<%= end %>") and String.starts_with?(next, "<%= else %>") ->
+        String.replace(prev, "<%= end %>", "") <> next
+      String.starts_with?(next, "<%= else %>") ->
+        raise "else is not preceded by if in template, snippet:\n #{prev <> next}"
+      true ->
+       prev <> next
+    end
   end
 
   defp build_html(node) do
@@ -63,6 +72,7 @@ defmodule Calliope.Compiler do
       <%= if#{cmd}do %>
         #{inline}
         #{compile(children)}
+      <%= end %>
     """ |> String.strip
   end
 
