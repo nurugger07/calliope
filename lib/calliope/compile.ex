@@ -25,7 +25,7 @@ defmodule Calliope.Compiler do
     next = compile(t)
     cond do
       String.ends_with?(prev, "<%= end %>") and String.starts_with?(next, "<%= else %>") ->
-        String.replace(prev, "<%= end %>", "") <> next
+        String.strip String.replace(prev, "<%= end %>", "") <> String.strip next
       String.starts_with?(next, "<%= else %>") ->
         raise "else is not preceded by if in template, snippet:\n #{prev <> next}"
       true ->
