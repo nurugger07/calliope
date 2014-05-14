@@ -18,6 +18,8 @@ defmodule Calliope.Compiler do
 
   def compile([]), do: ""
   def compile(nil), do: ""
+
+  #FIXME: no tail recursion here, could be a great performance drawback
   def compile([h|t]) do
     prev = build_html(h)
     next = compile(t)
