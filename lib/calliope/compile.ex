@@ -22,6 +22,7 @@ defmodule Calliope.Compiler do
   #FIXME: no tail recursion here, could be a great performance drawback
   def compile([h|t]) do
     prev = build_html(h)
+    prev = String.strip prev
     next = compile(t)
     cond do
       String.ends_with?(prev, "<%= end %>") and String.starts_with?(next, "<%= else %>") ->
@@ -76,13 +77,20 @@ defmodule Calliope.Compiler do
     # BUT
     # lc { id, headline, content } inlist posts do
     cmd = String.replace(cmd, ",", "")
-
-    """
+    if String.first inline do
+      """
       <%= if#{cmd}do %>
-        #{inline}
+        <%= #{String.strip inline} %>
         #{compile(children)}
       <%= end %>
-    """ |> String.strip
+      """
+    else
+      """
+      <%= if#{cmd}do %>
+        #{compile(children)}
+      <%= end %>
+      """
+    end |> String.strip
   end
 
   defp smart_script_to_string(<< "else", _script :: binary>>, children) do

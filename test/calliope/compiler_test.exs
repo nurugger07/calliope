@@ -198,13 +198,13 @@ defmodule CalliopeCompilerTest do
     expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
       <h1>Calliope</h1>
       <%= if a do %>
-        =hey
+      <%= hey %>
       <%= end %>
        }, "")
 
     parsed_tokens = [
                      [ indent: 1, tag: "h1", content: "Calliope"],
-                     [line_number: 1, smart_script: "if a, do: =hey"]
+                     [line_number: 1, smart_script: "if a, do: hey"]
                     ]
 
     compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
