@@ -140,4 +140,27 @@ defmodule CalliopeCompilerTest do
 
     assert expected_results == compiled_results
   end
+
+  test :compile_with_multiline_if_script do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <h1>Calliope</h1>
+      <%= if a do %>
+        <p>Truthy</p>
+      <% else %>
+        <p>Falsy</p>
+      <%= end %>}, "")
+
+    parsed_tokens = [
+                     [line_number: 1, smart_script: "if a do",
+                      children: [[line_number: 2, indent: 1, tag: "p", content: "Truthy"]]
+                     ],
+                     [line_number: 3, smart_script: "else",
+                         children: [[line_number: 4, indent: 1, tag: "p", content: "Falsy"]]
+                     ]
+                    ]
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
+  end
+
 end
