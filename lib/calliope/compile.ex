@@ -69,8 +69,8 @@ defmodule Calliope.Compiler do
 
   defp smart_script_to_string(script, children) do
     %{cmd: cmd, fun_sign: fun_sign, wraps_end: wraps_end} = cond do
-      String.starts_with?(script, "cond") ->
-        handle_do_cond(script)
+      String.starts_with?(script, "cond") or String.starts_with?(script, "case") ->
+        handle_do_case_or_cond(script)
       length(Regex.scan(~r/->/, script)) > 0 ->
         handle_arrow(script)
       true ->
@@ -136,15 +136,17 @@ defmodule Calliope.Compiler do
     end
   end
 
-  defp handle_do_cond(script) do
-    # cond do operator DON'T have inline, e.g.: cond, do: true -> "truly"
+  defp handle_do_case_or_cond(script) do
+    # cond or case operator DON'T have inline verion, e.g.: cond, do: true -> "truly"
     [ _, cmd, _] = Regex.split(~r/^(.*)do:?.*$/, script)
     %{cmd: cmd, inline: "", fun_sign: "do", wraps_end: "<%= end %>"}
   end
+
   defp handle_arrow(script) do
     [ _, cmd, _inline, _] = Regex.split(~r/^(.*)->:?(.*)$/, script)
     %{cmd: cmd, fun_sign: "->", wraps_end: ""}
   end
+
   defp has_any_key?( _, []), do: false
   defp has_any_key?(list, [h|t]), do: Keyword.has_key?(list, h) || has_any_key?(list, t)
 

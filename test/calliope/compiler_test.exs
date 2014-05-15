@@ -162,4 +162,26 @@ defmodule CalliopeCompilerTest do
 
     assert expected_results == compiled_results
   end
+
+  test :compile_with_case_evaluation do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <%= case value do %>
+        <%= [] -> %>
+          <p>Empty list</p>
+        <%= [head | tail] -> %>
+          <p>Non-empty list</p>
+        <%= true -> %>
+          <p>Boolean true</p>
+      <%= end %>}, "")
+
+    parsed_tokens = [
+      [ indent: 1, smart_script: "case value do", children: [
+        [ indent: 2, smart_script: "[] ->", children: [[ indent: 3, tag: "p", content: "Empty list" ]]],
+        [ indent: 2, smart_script: "[head | tail] ->", children: [[ indent: 3, tag: "p", content: "Non-empty list" ]]],
+        [ indent: 2, smart_script: "true ->", children: [[ indent: 3, tag: "p", content: "Boolean true" ]]]]]]
+
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
+  end
 end
