@@ -60,13 +60,23 @@ defmodule Calliope.Compiler do
   def evaluate_script(script) when is_binary(script), do: "<%= #{String.lstrip(script)} %>"
 
   defp smart_script_to_string(<< "lc", script :: binary>>, children) do
-    [ _, cmd, inline, _ ] = Regex.split(@lc, script)
+    [ _, cmd, inline, _ ] = cond do
+      length(Regex.scan(~r/do/, script)) > 0 -> Regex.split(@lc, script)
+      length(Regex.scan(~r/->/, script)) > 0 -> Regex.split(~r/^(.*)->:?(.*)$/, script)
+    end
+
+    [ fun_sign, wraps_end ] = cond do
+      length(Regex.scan(~r/->/, script)) > 0 -> [ "->", "" ]
+      true                                   -> [ "do", "<%= end %>" ]
+    end
+
     """
-      <%= lc#{cmd}do %>
+      <%= lc#{cmd}#{fun_sign} %>
         #{inline}
         #{compile(children)}
-      <%= end %>
-    """ |> String.strip
+      #{wraps_end}
+    """
+    |> String.strip
   end
 
   defp smart_script_to_string(<< "if", script :: binary>>, children) do
@@ -99,6 +109,24 @@ defmodule Calliope.Compiler do
         #{compile(children)}
       <%= end %>
     """ |> String.strip
+  end
+
+  defp smart_script_to_string(script, children) do
+    %{cmd: cmd, fun_sign: fun_sign, wraps_end: wraps_end} = cond do
+      String.starts_with?(script, "cond") or String.starts_with?(script, "case") ->
+        handle_do_case_or_cond(script)
+      length(Regex.scan(~r/->/, script)) > 0 ->
+        handle_arrow(script)
+      true ->
+        raise "Not implemented operator:\n #{script}"
+    end
+
+    """
+      <%= #{cmd}#{fun_sign} %>
+        #{compile(children)}
+      #{wraps_end}
+    """
+    |> String.strip
   end
 
   def precompile_content(nil), do: nil
@@ -155,6 +183,18 @@ defmodule Calliope.Compiler do
   defp delete_last_line(str) do
     String.split(str, "\n") |> List.delete_at(-1) |> Enum.join("\n")
   end
+
+  defp handle_do_case_or_cond(script) do
+    # cond or case operator DON'T have inline verion, e.g.: cond, do: true -> "truly"
+    [ _, cmd, _] = Regex.split(~r/^(.*)do:?.*$/, script)
+    %{cmd: cmd, inline: "", fun_sign: "do", wraps_end: "<%= end %>"}
+  end
+
+  defp handle_arrow(script) do
+    [ _, cmd, _inline, _] = Regex.split(~r/^(.*)->:?(.*)$/, script)
+    %{cmd: cmd, fun_sign: "->", wraps_end: ""}
+  end
+
   defp has_any_key?( _, []), do: false
   defp has_any_key?(list, [h|t]), do: Keyword.has_key?(list, h) || has_any_key?(list, t)
 
