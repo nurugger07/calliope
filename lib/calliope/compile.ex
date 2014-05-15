@@ -60,21 +60,13 @@ defmodule Calliope.Compiler do
   def evaluate_script(script) when is_binary(script), do: "<%= #{String.lstrip(script)} %>"
 
   defp smart_script_to_string(<< "lc", script :: binary>>, children) do
-    [ _, cmd, inline, _ ] = cond do
-      length(Regex.scan(~r/do/, script)) > 0 -> Regex.split(@lc, script)
-      length(Regex.scan(~r/->/, script)) > 0 -> Regex.split(~r/^(.*)->:?(.*)$/, script)
-    end
-
-    [ fun_sign, wraps_end ] = cond do
-      length(Regex.scan(~r/->/, script)) > 0 -> [ "->", "" ]
-      true                                   -> [ "do", "<%= end %>" ]
-    end
+    [ _, cmd, inline, _ ] = Regex.split(@lc, script)
 
     """
-      <%= lc#{cmd}#{fun_sign} %>
+      <%= lc#{cmd}do %>
         #{inline}
         #{compile(children)}
-      #{wraps_end}
+      <%= end %>
     """
     |> String.strip
   end
