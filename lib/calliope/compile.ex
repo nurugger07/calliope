@@ -19,10 +19,10 @@ defmodule Calliope.Compiler do
   def compile([]), do: ""
   def compile(nil), do: ""
 
-  #FIXME: no tail recursion here, could be a great performance drawback
   def compile([h|t]) do
-    prev = build_html(h)
-    prev = String.strip prev
+    prev = String.strip build_html(h)
+    # it seems no tail recursion here, may be refactored later
+    # to improve performance
     next = compile(t)
     cond do
       String.ends_with?(prev, "<%= end %>") and String.starts_with?(next, "<%= else %>") ->
@@ -185,9 +185,9 @@ defmodule Calliope.Compiler do
   end
 
   defp handle_do_case_or_cond(script) do
-    # cond or case operator DON'T have inline verion, e.g.: cond, do: true -> "truly"
+    # cond or case operator DOESN'T have inline verion, e.g.: cond, do: true -> "truly"
     [ _, cmd, _] = Regex.split(~r/^(.*)do:?.*$/, script)
-    %{cmd: cmd, inline: "", fun_sign: "do", wraps_end: "<%= end %>"}
+    %{cmd: cmd, fun_sign: "do", wraps_end: "<%= end %>"}
   end
 
   defp handle_arrow(script) do

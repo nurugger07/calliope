@@ -141,7 +141,7 @@ defmodule CalliopeCompilerTest do
     assert expected_results == compiled_results
   end
 
-  test :compile_with_multiline_if_else_script do
+  test :compile_with_if_else_evaluation do
     expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
       <h1>Calliope</h1>
       <%= if a do %>
@@ -164,7 +164,7 @@ defmodule CalliopeCompilerTest do
     assert expected_results == compiled_results
   end
 
- test :compile_with_multiline_if_only_script do
+ test :compile_with_if_without_else do
     expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
       <h1>Calliope</h1>
       <%= if a do %>
@@ -183,7 +183,7 @@ defmodule CalliopeCompilerTest do
     assert expected_results == compiled_results
  end
 
- test :compile_with_multiline_else_without_if do
+ test :compile_with_else_without_if do
     parsed_tokens = [
                      [ indent: 1, tag: "h1", content: "Calliope"],
                      [line_number: 1, smart_script: "else",
@@ -194,7 +194,7 @@ defmodule CalliopeCompilerTest do
     catch_error compile(parsed_tokens)
  end
 
- test :compile_with_multiline_if_inline do
+ test :compile_with_inline_if_evaluation do
     expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
       <h1>Calliope</h1>
       <%= if a do %>
