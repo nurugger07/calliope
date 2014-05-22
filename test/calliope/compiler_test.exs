@@ -140,4 +140,119 @@ defmodule CalliopeCompilerTest do
 
     assert expected_results == compiled_results
   end
+
+  test :compile_with_if_else_evaluation do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <h1>Calliope</h1>
+      <%= if a do %>
+        <p>Truly</p>
+      <%= else %>
+        <p>Falsy</p>
+      <%= end %>}, "")
+
+    parsed_tokens = [
+                     [ indent: 1, tag: "h1", content: "Calliope"],
+                     [line_number: 1, smart_script: "if a do",
+                      children: [[line_number: 2, indent: 2, tag: "p", content: "Truly"]]
+                     ],
+                     [line_number: 3, smart_script: "else",
+                         children: [[line_number: 4, indent: 2, tag: "p", content: "Falsy"]]
+                     ]
+                    ]
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
+  end
+
+ test :compile_with_if_without_else do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <h1>Calliope</h1>
+      <%= if a do %>
+        <p>Truly</p>
+      <%= end %>}, "")
+
+    parsed_tokens = [
+                     [ indent: 1, tag: "h1", content: "Calliope"],
+                     [line_number: 1, smart_script: "if a do",
+                      children: [[line_number: 2, indent: 2, tag: "p", content: "Truly"]]
+                     ]
+                    ]
+
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
+ end
+
+ test :compile_with_else_without_if do
+    parsed_tokens = [
+                     [ indent: 1, tag: "h1", content: "Calliope"],
+                     [line_number: 1, smart_script: "else",
+                      children: [[line_number: 2, indent: 2, tag: "p", content: "Truthy"]]
+                     ]
+                    ]
+
+    catch_error compile(parsed_tokens)
+ end
+
+ test :compile_with_inline_if_evaluation do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <h1>Calliope</h1>
+      <%= if a do %>
+      <%= hey %>
+      <%= end %>
+       }, "")
+
+    parsed_tokens = [
+                     [ indent: 1, tag: "h1", content: "Calliope"],
+                     [line_number: 1, smart_script: "if a, do: hey"]
+                    ]
+
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
+ end
+
+ test :compile_with_cond_evaluation do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <%= cond do %>
+        <%= (1 + 1 == 1) -> %>
+          <p>No1</p>
+        <%= (2 * 2 != 4) -> %>
+          <p>No2</p>
+        <%= true -> %>
+          <p>Yes</p>
+      <%= end %>}, "")
+
+    parsed_tokens = [
+      [ indent: 1, smart_script: "cond do", children: [
+        [ indent: 2, smart_script: "(1 + 1 == 1) ->", children: [[ indent: 3, tag: "p", content: "No1" ]]],
+        [ indent: 2, smart_script: "(2 * 2 != 4) ->", children: [[ indent: 3, tag: "p", content: "No2" ]]],
+        [ indent: 2, smart_script: "true ->", children: [[ indent: 3, tag: "p", content: "Yes" ]]]]]]
+
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
+  end
+
+  test :compile_with_case_evaluation do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <%= case value do %>
+        <%= [] -> %>
+          <p>Empty list</p>
+        <%= [head | tail] -> %>
+          <p>Non-empty list</p>
+        <%= true -> %>
+          <p>Boolean true</p>
+      <%= end %>}, "")
+
+    parsed_tokens = [
+      [ indent: 1, smart_script: "case value do", children: [
+        [ indent: 2, smart_script: "[] ->", children: [[ indent: 3, tag: "p", content: "Empty list" ]]],
+        [ indent: 2, smart_script: "[head | tail] ->", children: [[ indent: 3, tag: "p", content: "Non-empty list" ]]],
+        [ indent: 2, smart_script: "true ->", children: [[ indent: 3, tag: "p", content: "Boolean true" ]]]]]]
+
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
+  end
 end

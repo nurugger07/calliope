@@ -18,8 +18,20 @@ defmodule Calliope.Compiler do
 
   def compile([]), do: ""
   def compile(nil), do: ""
+
   def compile([h|t]) do
-    build_html(h) <> compile(t)
+    prev = String.strip build_html(h)
+    # it seems no tail recursion here, may be refactored later
+    # to improve performance
+    next = compile(t)
+    cond do
+      String.ends_with?(prev, "<%= end %>") and String.starts_with?(next, "<%= else %>") ->
+        delete_last_line(prev) <> next
+      String.starts_with?(next, "<%= else %>") ->
+        raise "else is not preceded by if in template, snippet:\n #{prev <> next}"
+      true ->
+       prev <> next
+    end
   end
 
   defp build_html(node) do
@@ -49,17 +61,69 @@ defmodule Calliope.Compiler do
 
   defp smart_script_to_string(<< "lc", script :: binary>>, children) do
     [ _, cmd, inline, _ ] = Regex.split(@lc, script)
+
     """
       <%= lc#{cmd}do %>
         #{inline}
         #{compile(children)}
       <%= end %>
+    """
+    |> String.strip
+  end
+
+  defp smart_script_to_string(<< "if", script :: binary>>, children) do
+    [ _, cmd, inline, _ ] = Regex.split(@lc, script)
+
+    # unlike inlines for lc, if inlines are used with "," before do, e. g.:
+    # if true, do: IO.puts "Truly!"
+    # BUT
+    # lc { id, headline, content } inlist posts do
+    cmd = String.replace(cmd, ",", "")
+    if String.first inline do
+      """
+      <%= if#{cmd}do %>
+        <%= #{String.strip inline} %>
+        #{compile(children)}
+      <%= end %>
+      """
+    else
+      """
+      <%= if#{cmd}do %>
+        #{compile(children)}
+      <%= end %>
+      """
+    end |> String.strip
+  end
+
+  defp smart_script_to_string(<< "else", _script :: binary>>, children) do
+    """
+      <%= else %>
+        #{compile(children)}
+      <%= end %>
     """ |> String.strip
+  end
+
+  defp smart_script_to_string(script, children) do
+    %{cmd: cmd, fun_sign: fun_sign, wraps_end: wraps_end} = cond do
+      String.starts_with?(script, "cond") or String.starts_with?(script, "case") ->
+        handle_do_case_or_cond(script)
+      length(Regex.scan(~r/->/, script)) > 0 ->
+        handle_arrow(script)
+      true ->
+        raise "Not implemented operator:\n #{script}"
+    end
+
+    """
+      <%= #{cmd}#{fun_sign} %>
+        #{compile(children)}
+      #{wraps_end}
+    """
+    |> String.strip
   end
 
   def precompile_content(nil), do: nil
   def precompile_content(content) do
-    Regex.scan(~r/\#{(.+)}/r, content) |> 
+    Regex.scan(~r/\#{(.+)}/r, content) |>
       map_content_to_args(content)
   end
 
@@ -105,6 +169,21 @@ defmodule Calliope.Compiler do
       has_any_key?(node, [:content]) -> nil
       true -> nil
     end
+  end
+
+  defp delete_last_line(str) do
+    String.split(str, "\n") |> List.delete_at(-1) |> Enum.join("\n")
+  end
+
+  defp handle_do_case_or_cond(script) do
+    # cond or case operator DOESN'T have inline verion, e.g.: cond, do: true -> "truly"
+    [ _, cmd, _] = Regex.split(~r/^(.*)do:?.*$/, script)
+    %{cmd: cmd, fun_sign: "do", wraps_end: "<%= end %>"}
+  end
+
+  defp handle_arrow(script) do
+    [ _, cmd, _inline, _] = Regex.split(~r/^(.*)->:?(.*)$/, script)
+    %{cmd: cmd, fun_sign: "->", wraps_end: ""}
   end
 
   defp has_any_key?( _, []), do: false
