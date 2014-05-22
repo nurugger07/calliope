@@ -101,7 +101,6 @@ defmodule Calliope.Compiler do
     cond do
       has_any_key?(node, [:doctype]) -> Keyword.get(node, :doctype)
       has_any_key?(node, [:tag]) -> Keyword.get(node, :tag)
-      has_any_key?(node, [:tag]) -> Keyword.get(node, :tag)
       has_any_key?(node, [:id, :classes]) -> "div"
       has_any_key?(node, [:content]) -> nil
       true -> nil
