@@ -59,7 +59,7 @@ defmodule Calliope.Compiler do
 
   defp smart_script_to_string(script, children) do
     %{cmd: cmd, fun_sign: fun_sign, wraps_end: wraps_end} = cond do
-      String.starts_with?(script, "cond") or String.starts_with?(script, "case") ->
+      String.starts_with?(script, "cond") ->
         handle_cond_do(script)
       length(Regex.scan(~r/->/, script)) > 0 ->
         handle_arrow(script)
