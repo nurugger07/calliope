@@ -1,4 +1,5 @@
-defexception CalliopeException, [:message] do
+defmodule CalliopeException do
+  defexception [:message]
 
   def messages do
     [
@@ -12,7 +13,7 @@ defexception CalliopeException, [:message] do
     error = error_message(opts)
     line = line_number(opts)
 
-    CalliopeException[message: build_message(error, line)]
+    %CalliopeException{message: build_message(error, line)}
   end
 
   defp build_message(error, line), do: Regex.replace(~r/#/, messages[error], "#{line}")
