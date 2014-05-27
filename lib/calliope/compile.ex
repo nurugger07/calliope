@@ -57,9 +57,27 @@ defmodule Calliope.Compiler do
     """ |> String.strip
   end
 
+  defp smart_script_to_string(script, children) do
+    %{cmd: cmd, fun_sign: fun_sign, wraps_end: wraps_end} = cond do
+      String.starts_with?(script, "cond") ->
+        handle_cond_do(script)
+      length(Regex.scan(~r/->/, script)) > 0 ->
+        handle_arrow(script)
+      true ->
+        raise "Not implemented operator:\n #{script}"
+    end
+
+    """
+      <%= #{cmd}#{fun_sign} %>
+        #{compile(children)}
+      #{wraps_end}
+    """
+    |> String.strip
+  end
+
   def precompile_content(nil), do: nil
   def precompile_content(content) do
-    Regex.scan(~r/\#{(.+)}/r, content) |> 
+    Regex.scan(~r/\#{(.+)}/r, content) |>
       map_content_to_args(content)
   end
 
@@ -110,4 +128,14 @@ defmodule Calliope.Compiler do
   defp has_any_key?( _, []), do: false
   defp has_any_key?(list, [h|t]), do: Keyword.has_key?(list, h) || has_any_key?(list, t)
 
+  defp handle_cond_do(script) do
+    # cond or case operator DOESN'T have inline verion, e.g.: cond, do: true -> "truly"
+    [ _, cmd, _] = Regex.split(~r/^(.*)do:?.*$/, script)
+    %{cmd: cmd, fun_sign: "do", wraps_end: "<%= end %>"}
+  end
+
+  defp handle_arrow(script) do
+    [ _, cmd, _inline, _] = Regex.split(~r/^(.*)->:?(.*)$/, script)
+    %{cmd: cmd, fun_sign: "->", wraps_end: ""}
+  end
 end

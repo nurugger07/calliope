@@ -140,4 +140,26 @@ defmodule CalliopeCompilerTest do
 
     assert expected_results == compiled_results
   end
+
+  test :compile_with_cond_evaluation do
+    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <%= cond do %>
+        <%= (1 + 1 == 1) -> %>
+          <p>No1</p>
+        <%= (2 * 2 != 4) -> %>
+          <p>No2</p>
+        <%= true -> %>
+          <p>Yes</p>
+      <%= end %>}, "")
+
+    parsed_tokens = [
+      [ indent: 1, smart_script: "cond do", children: [
+        [ indent: 2, smart_script: "(1 + 1 == 1) ->", children: [[ indent: 3, tag: "p", content: "No1" ]]],
+        [ indent: 2, smart_script: "(2 * 2 != 4) ->", children: [[ indent: 3, tag: "p", content: "No2" ]]],
+        [ indent: 2, smart_script: "true ->", children: [[ indent: 3, tag: "p", content: "Yes" ]]]]]]
+
+    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+
+    assert expected_results == compiled_results
+  end
 end
