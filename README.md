@@ -31,7 +31,16 @@ Into this HTML:
 
 ## Using
 
-To use Calliope, add a dependency to your project mix file
+
+Calliope is simple to add to any project. If you are using the hex package manager, just add the following to your mix file:
+
+``` elixir
+def deps do
+  [ { :calliope, '~> 0.2.1' } ]
+end
+```
+
+If you aren't using hex, add the a reference to the github repo.
 
 ``` elixir
 def deps do
