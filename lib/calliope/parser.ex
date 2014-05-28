@@ -89,6 +89,7 @@ defmodule Calliope.Parser do
     merge_into(:classes, merge_into(:id, list, id), classes) ++ [attributes: attributes ]
   end
 
+  defp extract(_, nil), do: []
   defp extract(key, str) do
     case Regex.run(~r/#{key}[=:]\s?['\"](.*)['"]/r, str) do
       [ _, match | _ ] -> String.split match
