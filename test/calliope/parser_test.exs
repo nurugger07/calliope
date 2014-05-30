@@ -11,7 +11,7 @@ defmodule CalliopeParserTest do
       [5, "\t", "/[if IE]"],
       [6, "\t\t", "%h2", "An Elixir Haml Parser"],
       [7, "\t", "#main", ".content"],
-      [8, "\t\t", "- lc { arg } inlist args do"],
+      [8, "\t\t", "- for { arg } <- args do"],
       [9, "\t\t\t", "= arg"],
       [10, "\t\t", " Welcome to \#{title}"],
       [11, "%section", ".container", "(data-a: 'calliope', data-b: 'awesome')"],
@@ -26,7 +26,7 @@ defmodule CalliopeParserTest do
       [ indent: 1, comment: "!--[if IE]", line_number: 5 ],
       [ indent: 2, tag: "h2", content: "An Elixir Haml Parser", line_number: 6 ],
       [ indent: 1, id: "main", classes: ["content"], line_number: 7 ],
-      [ indent: 2, smart_script: "lc { arg } inlist args do", line_number: 8 ],
+      [ indent: 2, smart_script: "for { arg } <- args do", line_number: 8 ],
       [ indent: 3, script: " arg", line_number: 9 ],
       [ indent: 2, content: "Welcome to \#{title}", line_number: 10 ],
       [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'", line_number: 11 ],
@@ -43,7 +43,7 @@ defmodule CalliopeParserTest do
             ]
           ],
           [ indent: 1, id: "main", classes: ["content"], line_number: 7, children: [
-              [ indent: 2, smart_script: "lc { arg } inlist args do", line_number: 8, children: [
+              [ indent: 2, smart_script: "for { arg } <- args do", line_number: 8, children: [
                   [ indent: 3, script: " arg", line_number: 9 ]
                 ]
               ],

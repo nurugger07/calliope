@@ -47,10 +47,10 @@ defmodule Calliope.Compiler do
   def evaluate_script(nil), do: ""
   def evaluate_script(script) when is_binary(script), do: "<%= #{String.lstrip(script)} %>"
 
-  defp smart_script_to_string(<< "lc", script :: binary>>, children) do
+  defp smart_script_to_string(<< "for", script :: binary>>, children) do
     [ _, cmd, inline, _ ] = Regex.split(@lc, script)
     """
-      <%= lc#{cmd}do %>
+      <%= for#{cmd}do %>
         #{inline}
         #{compile(children)}
       <%= end %>

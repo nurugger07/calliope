@@ -15,7 +15,7 @@ defmodule CalliopeTokenizerTest do
     Welcome to Calliope}
 
   @haml_with_collection  """
-- lc { content } inlist posts do
+- for { content } <- posts do
   %div
     = content
 """
@@ -54,7 +54,7 @@ defmodule CalliopeTokenizerTest do
     ] == tokenize(@haml)
 
     assert [
-      [1, "- lc { content } inlist posts do"],
+      [1, "- for { content } <- posts do"],
       [2, "\t", "%div"],
       [3, "\t\t", "= content"]
       ] == tokenize(@haml_with_collection)

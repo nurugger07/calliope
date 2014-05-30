@@ -47,7 +47,7 @@ defmodule CalliopeCompilerTest do
   }, "")
 
 
-  @smart [[smart_script: "lc { id, content } inlist posts do", children: [
+  @smart [[smart_script: "for { id, content } <- posts do", children: [
               [indent: 1, tag: "div", children: [[indent: 2, script: "content"]]]
             ]]]
 
@@ -124,13 +124,13 @@ defmodule CalliopeCompilerTest do
   test :compile_with_multiline_script do
     expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
       <h1>Calliope</h1>
-      <%= lc a inlist b do %>
+      <%= for a <- b do %>
         <div><%= a %></div>
       <%= end %>}, "")
 
     parsed_tokens = [
       [ indent: 1, tag: "h1", content: "Calliope"],
-      [ indent: 1, smart_script: "lc a inlist b do", children: [
+      [ indent: 1, smart_script: "for a <- b do", children: [
           [ indent: 2, tag: "div", script: "a"]
         ]
       ]
