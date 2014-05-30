@@ -139,7 +139,7 @@ Calliope will render:
 Calliope doesn't just evaluate arguments, you can actually embed Elixir directly into the templates:
 
 ``` haml
-- lc { id, headline, content } inlist posts do
+- for { id, headline, content } <- posts do
   %h1
     %a{href: "posts/#{id}"= headline
   .content
@@ -168,6 +168,49 @@ Will render
   Content 2
 </div>
 ```
+
+## Precompile Templates
+
+Calliope provides an Engine to precompile your haml templates in to functions. This parses the template at compile time and creates a function that takes the name and args needed to render the page. These functions are scoped to the module that uses the engine.
+
+Adding this functionality is easy.
+
+``` elixir
+  defmodule Simple do
+
+    use Calliope.Engine
+
+    def show do
+      content_for(:show, [title: Calliope])
+    end
+
+  end
+```
+
+If you are using layouts, you can set the layout and call the `content_with_layout` function.
+
+``` elixir
+  defmodule Simple do
+
+    use Calliope.Engine, layout: "application"
+
+    def show do
+      content_with_layout(:show, [title: Calliope])
+    end
+
+  end
+```
+
+In addition to `:layout`, you can also set the following options:
+
+`:path` - provides the root path. The default is the current working directory.
+`:templates` - used to define where the templates are stored. By default it will use `:path`
+`:alias` - used to set the directory where the templates are located. The
+            default value is 'templates'.
+`:layout_directory` - the directory that your layouts are stored relative to the
+             templates path. The default directory is `layouts`
+`:layout` - the layout to use for templates. The default is `:none` or you can pass in
+            the name of a layout.
 
 ## Coming Soon
 
