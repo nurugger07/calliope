@@ -91,7 +91,7 @@ defmodule Calliope.Parser do
 
   defp extract(_, nil), do: []
   defp extract(key, str) do
-    case Regex.run(~r/#{key}[=:]\s?['\"](.*)['"]/r, str) do
+    case Regex.run(~r/#{key}[=:]\s?['"](.*)['"]/r, str) do
       [ _, match | _ ] -> String.split match
       _ -> []
     end
