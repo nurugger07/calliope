@@ -46,7 +46,8 @@ defmodule Calliope.Tokenizer do
   defp add_tab(0, acc), do: acc
   defp add_tab(n, acc), do: add_tab(n-1, "\t" <> acc)
 
+  def index(list, i\\1)
   def index([], _), do: []
-  def index([h|t], i\\1), do: [[i | h] | index(t, i+1)]
+  def index([h|t], i), do: [[i | h] | index(t, i+1)]
 
 end

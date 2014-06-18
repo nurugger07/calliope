@@ -23,7 +23,7 @@ defmodule Calliope.Compiler do
   end
 
   defp build_html(node) do
-    html = cond do
+    cond do
       node[:smart_script] -> evaluate_smart_script(node[:smart_script], node[:children])
       true -> evaluate(node)
     end

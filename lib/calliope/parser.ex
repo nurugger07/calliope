@@ -20,11 +20,12 @@ defmodule Calliope.Parser do
   def parse_lines([]), do: []
   def parse_lines([h|t]), do: [parse_line(h)|parse_lines(t)]
 
+  def parse_line(list, acc \\ [])
   def parse_line([], acc), do: acc
   def parse_line([h|t], acc) when is_integer(h) do
     parse_line(t, [line_number: h] ++ acc)
   end
-  def parse_line([h|t], acc\\[]) do
+  def parse_line([h|t], acc) do
     [sym, val] = [head(h), tail(h)]
     acc = case sym do
       @doctype  -> [ doctype: h ] ++ acc
