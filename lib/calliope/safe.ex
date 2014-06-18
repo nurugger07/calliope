@@ -28,18 +28,18 @@ defmodule Calliope.Safe do
   def clean(str) when is_binary(str), do: scrub(str, @html_escape)
   def clean([]), do: []
   def clean([{ arg, val} | t ]) when is_binary(val) do
-    [ { arg, scrub(val, @html_escape) } ] ++ clean(t)
+    [ { arg, scrub(val, @html_escape) } | clean(t) ]
   end
   def clean([{ arg, val} | t]) when is_list(val) do
-    [ { arg, scrub_list(val) } ] ++ clean(t)
+    [ { arg, scrub_list(val) } | clean(t) ]
   end
 
   defp scrub_list([]), do: []
   defp scrub_list([h|t]) when is_tuple(h) do
-    [(tuple_to_list(h) |> scrub_list |> list_to_tuple)] ++ scrub_list(t)
+    [(tuple_to_list(h) |> scrub_list |> list_to_tuple) | scrub_list(t)]
   end
   defp scrub_list([h|t]) do
-    [scrub(h, @html_escape)] ++ scrub_list(t)
+    [scrub(h, @html_escape) | scrub_list(t)]
   end
 
   defp scrub(val, []), do: val
