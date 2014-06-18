@@ -39,7 +39,7 @@ defmodule Calliope.Compiler do
     comment(line[:comment], :close)
   end
 
-  def evaluate_smart_script(<< "#", _ :: binary >>, _, _), do: ""
+  def evaluate_smart_script("#" <> _, _, _), do: ""
   def evaluate_smart_script(script, children) do
     smart_script_to_string(script, children)
   end
@@ -47,7 +47,7 @@ defmodule Calliope.Compiler do
   def evaluate_script(nil), do: ""
   def evaluate_script(script) when is_binary(script), do: "<%= #{String.lstrip(script)} %>"
 
-  defp smart_script_to_string(<< "for", script :: binary>>, children) do
+  defp smart_script_to_string("for" <> script, children) do
     [ _, cmd, inline, _ ] = Regex.split(@lc, script)
     """
       <%= for#{cmd}do %>
@@ -90,15 +90,15 @@ defmodule Calliope.Compiler do
   def comment("!--", :open), do: "<!-- "
   def comment("!--", :close), do: " -->"
 
-  def comment(<<"!--" :: binary, condition :: binary>>, :open), do: "<!--#{condition}> "
-  def comment(<<"!--" :: binary, _ :: binary>>, :close), do: " <![endif]-->"
+  def comment("!--" <> condition, :open), do: "<!--#{condition}> "
+  def comment("!--" <> _, :close), do: " <![endif]-->"
 
   def open( _, nil), do: ""
-  def open( _, <<"!!!" :: binary, key :: binary>>), do: @doctypes[:"!!!#{key}"]
+  def open( _, "!!!" <> key), do: @doctypes[:"!!!#{key}"]
   def open(attributes, tag_value), do: "<#{tag_value}#{attributes}>"
 
   def close(nil), do: ""
-  def close(<<"!!!" :: binary, _ :: binary>>), do: ""
+  def close("!!!" <> _), do: ""
   def close(tag_value) when tag_value in @self_closing, do: ""
   def close(tag_value), do: "</#{tag_value}>"
 

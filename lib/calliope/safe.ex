@@ -13,7 +13,7 @@ defmodule Calliope.Safe do
     { "'", "&#39;" },
   ]
 
-  def eval_safe_script(<< "Safe.script", script :: binary >>, args) do
+  def eval_safe_script("Safe.script" <> script, args) do
     evaluate_script(args, script)
   end
   def eval_safe_script(script, args) do

@@ -78,7 +78,7 @@ defmodule Calliope.Parser do
     Keyword.get(token1, :indent, 0) > Keyword.get(token2, :indent, 0)
   end
 
-  defp merge_attributes(list, << "{", value :: binary >>) do
+  defp merge_attributes(list, "{" <> value) do
     list ++ [content: "{{#{value}"]
   end
   defp merge_attributes(list, value) do
@@ -123,7 +123,7 @@ defmodule Calliope.Parser do
 
   defp invalid_indentation?(_, nil), do: false
   defp invalid_indentation?(parent, child) do
-    Keyword.get(child, :indent, 0) > Keyword.get(parent, :indent, 0) + 1 
+    Keyword.get(child, :indent, 0) > Keyword.get(parent, :indent, 0) + 1
   end
 
   defp raise_error(error, line), do: raise(CalliopeException, error: error, line: line)
