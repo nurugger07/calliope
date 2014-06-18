@@ -8,7 +8,7 @@ defmodule Calliope.Tokenizer do
 
   def tokenize([]), do: []
   def tokenize([h|t]) do
-    [tokenize_line(h)] ++ tokenize(t)
+    [tokenize_line(h) | tokenize(t)]
   end
 
   defp filter(list), do: Enum.filter(list, fn(x) -> x != [] end)
@@ -22,11 +22,11 @@ defmodule Calliope.Tokenizer do
   def tokenize_identation([h|t], spacing) do
     [head|tail] = h
     new_head = cond do
-      Regex.match?(~r/^ +$/, head) -> [replace_with_tabs(head, spacing)] ++ tail
+      Regex.match?(~r/^ +$/, head) -> [replace_with_tabs(head, spacing) | tail]
       true -> h
     end
 
-    [new_head] ++ tokenize_identation(t, spacing)
+    [new_head | tokenize_identation(t, spacing)]
   end
 
   defp replace_with_tabs(empty_str, spacing) do
@@ -46,7 +46,8 @@ defmodule Calliope.Tokenizer do
   defp add_tab(0, acc), do: acc
   defp add_tab(n, acc), do: add_tab(n-1, "\t" <> acc)
 
+  def index(list, i\\1)
   def index([], _), do: []
-  def index([h|t], i\\1), do: [[i] ++ h] ++ index(t, i+1)
+  def index([h|t], i), do: [[i | h] | index(t, i+1)]
 
 end

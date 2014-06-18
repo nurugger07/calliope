@@ -2,7 +2,6 @@ defmodule Calliope.Render do
   import Calliope.Tokenizer
   import Calliope.Parser
   import Calliope.Compiler
-  import Calliope.Safe
 
   def precompile(haml) do
     tokenize(haml) |> parse |> compile

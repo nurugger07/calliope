@@ -67,15 +67,15 @@ defmodule CalliopeParserTest do
     ]
 
   @parsed_with_haml_comment [
-      [ line_number: 1, tag: "p", content: "foo", children: [
-          [ line_number: 2, indent: 1, smart_script: "# This would", children: [
-              [ line_number: 3, indent: 2, content: "Not be"],
-              [ line_number: 4, indent: 2, content: "output"]
+      [ content: "foo", tag: "p", line_number: 1,children: [
+          [ smart_script: "# This would", indent: 1, line_number: 2, children: [
+              [ content: "Not be", indent: 2, line_number: 3],
+              [ content: "output", indent: 2, line_number: 4]
             ],
           ]
         ]
       ],
-      [ line_number: 5, tag: "p", content: "bar"]
+      [ content: "bar", tag: "p", line_number: 5 ]
     ]
 
   test :parse do
@@ -84,7 +84,7 @@ defmodule CalliopeParserTest do
 
   test :parse_with_special_cases do
     handle_bars = [[1, "%h1", "{{user}}"]]
-    parsed_handle_bars = [[ line_number: 1, tag: "h1", content: "{{user}}"]]
+    parsed_handle_bars = [[ content: "{{user}}", tag: "h1", line_number: 1 ]]
     assert parsed_handle_bars == parse handle_bars
   end
 
@@ -120,7 +120,7 @@ defmodule CalliopeParserTest do
     msg = "Indentation was too deep on line number: 3"
     assert_raise CalliopeException, msg, fn() ->
       parse([[1, "#main"],
-             [2, "\t", "%h1", "Calliope"], 
+             [2, "\t", "%h1", "Calliope"],
              [3, "\t\t\t", "%h2", "Indent Too Deep" ]])
     end
   end

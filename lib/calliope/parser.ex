@@ -20,24 +20,25 @@ defmodule Calliope.Parser do
   def parse_lines([]), do: []
   def parse_lines([h|t]), do: [parse_line(h)|parse_lines(t)]
 
+  def parse_line(list, acc \\ [])
   def parse_line([], acc), do: acc
   def parse_line([h|t], acc) when is_integer(h) do
-    parse_line(t, acc ++ [line_number: h])
+    parse_line(t, [line_number: h] ++ acc)
   end
-  def parse_line([h|t], acc\\[]) do
+  def parse_line([h|t], acc) do
     [sym, val] = [head(h), tail(h)]
     acc = case sym do
-      @doctype  -> acc ++ [ doctype: h ]
-      @tag      -> acc ++ [ tag: val ]
+      @doctype  -> [ doctype: h ] ++ acc
+      @tag      -> [ tag: val ] ++ acc
       @id       -> handle_id(acc, val)
       @class    -> merge_into(:classes, acc, [val])
-      @tab      -> acc ++ [ indent: String.length(h) ]
+      @tab      -> [ indent: String.length(h) ] ++ acc
       @attrs    -> merge_attributes( acc, val)
       @parens   -> merge_attributes( acc, val)
-      @comment  -> acc ++ handle_comment(val)
-      @script   -> acc ++ [ script: val ]
-      @smart    -> acc ++ [ smart_script: String.strip(val) ]
-      _         -> acc ++ [ content: String.strip(h) ]
+      @comment  -> handle_comment(val) ++ acc
+      @script   -> [ script: val ] ++ acc
+      @smart    -> [ smart_script: String.strip(val) ] ++ acc
+      _         -> [ content: String.strip(h) ] ++ acc
     end
     parse_line(t, acc)
   end
@@ -46,7 +47,7 @@ defmodule Calliope.Parser do
   def handle_id(line, id) do
     cond do
       line[:id] -> raise_error :multiple_ids_assigned, line[:line_number]
-      true -> line ++ [ id: id ]
+      true -> [ id: id ] ++ line
     end
   end
 
@@ -78,27 +79,27 @@ defmodule Calliope.Parser do
     Keyword.get(token1, :indent, 0) > Keyword.get(token2, :indent, 0)
   end
 
-  defp merge_attributes(list, << "{", value :: binary >>) do
-    list ++ [content: "{{#{value}"]
+  defp merge_attributes(list, "{" <> value) do
+    [content: "{{#{value}"] ++ list
   end
   defp merge_attributes(list, value) do
     classes = extract(:class, value)
     id = extract(:id, value)
     attributes = build_attributes(value)
 
-    merge_into(:classes, merge_into(:id, list, id), classes) ++ [attributes: attributes ]
+    [attributes: attributes] ++ merge_into(:classes, merge_into(:id, list, id), classes)
   end
 
   defp extract(_, nil), do: []
   defp extract(key, str) do
-    case Regex.run(~r/#{key}[=:]\s?['\"](.*)['"]/r, str) do
+    case Regex.run(~r/#{key}[=:]\s?['"](.*)['"]/r, str) do
       [ _, match | _ ] -> String.split match
       _ -> []
     end
   end
 
   defp merge_into(:id, list, []), do: list
-  defp merge_into(:id, list, [h|_]), do: list ++ [ id: h ]
+  defp merge_into(:id, list, [h|_]), do: [ id: h ] ++ list
 
   defp merge_into(_, list, []), do: list
   defp merge_into(key, list, value) do
@@ -117,13 +118,13 @@ defmodule Calliope.Parser do
     next = List.first(t)
     cond do
       invalid_indentation?(h, next) -> raise_error(:too_deep_indent, next[:line_number])
-      true -> [h] ++ validations(t)
+      true -> [h | validations(t)]
     end
   end
 
   defp invalid_indentation?(_, nil), do: false
   defp invalid_indentation?(parent, child) do
-    Keyword.get(child, :indent, 0) > Keyword.get(parent, :indent, 0) + 1 
+    Keyword.get(child, :indent, 0) > Keyword.get(parent, :indent, 0) + 1
   end
 
   defp raise_error(error, line), do: raise(CalliopeException, error: error, line: line)
