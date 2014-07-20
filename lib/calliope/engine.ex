@@ -99,7 +99,7 @@ defmodule Calliope.Engine do
     content = precompile_view path <> "/" <> view
 
     quote do
-      def content_for(unquote(binary_to_atom name), args) do
+      def content_for(unquote(String.to_atom name), args) do
         Calliope.Render.eval unquote(content), args
       end
       def content_for(unquote(name), args) do

@@ -36,7 +36,7 @@ defmodule Calliope.Safe do
 
   defp scrub_list([]), do: []
   defp scrub_list([h|t]) when is_tuple(h) do
-    [(tuple_to_list(h) |> scrub_list |> list_to_tuple) | scrub_list(t)]
+    [(Tuple.to_list(h) |> scrub_list |> List.to_tuple)] ++ scrub_list(t)
   end
   defp scrub_list([h|t]) do
     [scrub(h, @html_escape) | scrub_list(t)]

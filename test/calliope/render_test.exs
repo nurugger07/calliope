@@ -5,7 +5,7 @@ defmodule CalliopeRenderTest do
 
   @haml ~s{
 !!! 5
-%section.container{class: "blue"}
+%section.container(class= "blue")
   %article
     %h1= title
     / %h1 An important inline comment
