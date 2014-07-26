@@ -37,6 +37,12 @@ defmodule CalliopeRenderTest do
     assert "<h1>{{user}}</h1>" == render "%h1 {{user}}"
   end
 
+  test :eval do
+    result = "<a href='http://example.com'>Example</a>"
+    assert result == render "%a{href: 'http://example.com'} Example" |> eval []
+    assert result == render(~s{%a(href: 'http://example.com')= "Example"}) |> eval [conn: []]
+  end
+
   test :render_with_params do
     assert "<a href='<%= url %>'><%= title %></a>" ==
       render @haml_with_args
