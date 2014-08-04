@@ -36,7 +36,7 @@ Calliope is simple to add to any project. If you are using the hex package manag
 
 ``` elixir
 def deps do
-  [ { :calliope, '~> 0.2.1' } ]
+  [ { :calliope, '~> 0.2.5' } ]
 end
 ```
 
