@@ -29,7 +29,7 @@ defmodule Calliope.Parser do
     [sym, val] = [head(h), tail(h)]
     acc = case sym do
       @doctype  -> [ doctype: h ] ++ acc
-      @tag      -> [ tag: val ] ++ acc
+      @tag      -> [ tag: String.strip(val) ] ++ acc
       @id       -> handle_id(acc, val)
       @class    -> merge_into(:classes, acc, [val])
       @tab      -> [ indent: String.length(h) ] ++ acc
@@ -57,6 +57,7 @@ defmodule Calliope.Parser do
       String.replace(~r/id[=:]\s?['"](.*)['"]/r, "") |>
       String.replace(~r/:\s([\'"])/, "=\\1") |>
       String.replace(~r/:\s(\w+)\s?/, "='\#{\\1}'") |>
+      String.replace(~r/[})]$/, "") |>
       String.replace(~r/,\s?/, " ") |>
       String.strip
   end

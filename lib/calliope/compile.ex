@@ -3,8 +3,6 @@ defmodule Calliope.Compiler do
   @attributes   [ :id, :classes, :attributes ]
   @self_closing [ "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr" ]
 
-  @lc ~r/^(.*)do:?(.*)$/
-
   @doctypes [
     { :"!!!", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"},
     { :"!!! 5", "<!DOCTYPE html>" },
@@ -48,7 +46,7 @@ defmodule Calliope.Compiler do
   def evaluate_script(script) when is_binary(script), do: "<%= #{String.lstrip(script)} %>"
 
   defp smart_script_to_string("for" <> script, children) do
-    [ _, cmd, inline, _ ] = Regex.split(@lc, script)
+    [cmd, inline] = Regex.split(~r/do:?/, script)
     """
       <%= for#{cmd}do %>
         #{inline}
@@ -131,12 +129,12 @@ defmodule Calliope.Compiler do
 
   defp handle_cond_do(script) do
     # cond or case operator DOESN'T have inline verion, e.g.: cond, do: true -> "truly"
-    [ _, cmd, _] = Regex.split(~r/^(.*)do:?.*$/, script)
+    [cmd] = Regex.split(~r/do:?/, script, trim: true)
     %{cmd: cmd, fun_sign: "do", wraps_end: "<%= end %>"}
   end
 
   defp handle_arrow(script) do
-    [ _, cmd, _inline, _] = Regex.split(~r/^(.*)->:?(.*)$/, script)
+    [cmd] = Regex.split(~r/->:?$/, script, trim: true)
     %{cmd: cmd, fun_sign: "->", wraps_end: ""}
   end
 end

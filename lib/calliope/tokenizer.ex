@@ -3,7 +3,7 @@ defmodule Calliope.Tokenizer do
   @regex  ~r/(?:(^[\t| ]+)|(\/\s)|(\/\[\w+])|([%.#][-:\w]+)|([{(].+?['"][)}])|(.+))\s*/
 
   def tokenize(haml) when is_binary(haml) do
-    Regex.split(~r/\n/, haml) |> tokenize |> filter |> tokenize_identation |> index
+    Regex.split(~r/\n/, haml, trim: true) |> tokenize |> filter |> tokenize_identation |> index
   end
 
   def tokenize([]), do: []
@@ -14,7 +14,12 @@ defmodule Calliope.Tokenizer do
   defp filter(list), do: Enum.filter(list, fn(x) -> x != [] end)
 
   def tokenize_line(line) do
-    Regex.split(@regex, line, trim: true)
+    Regex.scan(@regex, line, trim: true) |> reduce
+  end
+
+  def reduce([]), do: []
+  def reduce([h|t]) do
+    [List.foldr(h, "", fn(x, acc) -> acc = x end) | reduce(t)]
   end
 
   def tokenize_identation(list), do: tokenize_identation(list, compute_tabs(list))
