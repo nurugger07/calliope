@@ -1,6 +1,6 @@
 ![Calliope](http://f.cl.ly/items/0T3a1a1w472z2o3p0d3O/6660441229_f6503a0dd2_b.jpg)
 
-# Calliope - An Elixir Haml Parser
+# Calliope - An Elixir Haml Parser [![Build Status](https://travis-ci.org/nurugger07/calliope.png?branch=master)](https://travis-ci.org/nurugger07/calliope)
 
 For those of you that prefer the poetic beauty of [HAML](https://github.com/haml/haml) templates over HTML, then Calliope is the package for you. Calliope is a parser written in [Elixir](http://elixir-lang.org/) that will render HAML/Elixir templates into HTML. For example, we can render the following HAML:
 
