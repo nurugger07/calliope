@@ -107,6 +107,8 @@ defmodule CalliopeParserTest do
   end
 
   test :build_attributes do
+    assert "style='margin-top: 5px'" == build_attributes("style: 'margin-top: 5px' }")
+    assert "style=\"margin-top: 5px\"" == build_attributes("style: \"margin-top: 5px\" }")
     assert "href='http://google.com'" == build_attributes("href: 'http://google.com' }")
     assert "src='\#{url}'" == build_attributes("src: url }")
   end
