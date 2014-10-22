@@ -12,7 +12,7 @@ defmodule Calliope.Mixfile do
         files: ["lib", "mix.exs", "README*", "LICENSE*"],
         contributors: ["Johnny Winn"],
         licenses: ["Apache 2.0"],
-        links: [ github: "https://github.com/nurugger07/calliope" ]
+        links: %{ "Github" => "https://github.com/nurugger07/calliope" }
       ],
       description: """
       An Elixir library for parsing haml templates.
