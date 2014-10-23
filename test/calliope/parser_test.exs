@@ -113,6 +113,7 @@ defmodule CalliopeParserTest do
     assert "style=\"margin-top: 5px\"" == build_attributes("style: \"margin-top: 5px\" }")
     assert "href='http://google.com'" == build_attributes("href: 'http://google.com' }")
     assert "src='<%= url %>'" == build_attributes("src: url }")
+    assert "some-long-value='<%= @value %>'" == build_attributes("\"some-long-value\" => @value }")
   end
 
   test :haml_exceptions do

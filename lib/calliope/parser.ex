@@ -58,6 +58,7 @@ defmodule Calliope.Parser do
       String.replace(~r/:\s([\'"])/, "=\\1") |>
       String.replace(~r/[:=]\s?(?!.*["'])(@?\w+)\s?/, "='<%= \\1 %>'") |>
       String.replace(~r/[})]$/, "") |>
+      String.replace(~r/"(.+?)"\s=>\s(@?\w+)\s?/, "\\1='<%= \\2 %>'") |>
       String.replace(~r/,\s?/, " ") |>
       String.strip
   end
