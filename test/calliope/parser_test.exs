@@ -107,10 +107,12 @@ defmodule CalliopeParserTest do
   end
 
   test :build_attributes do
+    assert "class='<%= @class_name %>'" == build_attributes("class: @class_name }")
+    assert "class='<%= @class_name %>'" == build_attributes("class=@class_name }")
     assert "style='margin-top: 5px'" == build_attributes("style: 'margin-top: 5px' }")
     assert "style=\"margin-top: 5px\"" == build_attributes("style: \"margin-top: 5px\" }")
     assert "href='http://google.com'" == build_attributes("href: 'http://google.com' }")
-    assert "src='\#{url}'" == build_attributes("src: url }")
+    assert "src='<%= url %>'" == build_attributes("src: url }")
   end
 
   test :haml_exceptions do

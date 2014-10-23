@@ -5,7 +5,7 @@ defmodule CalliopeRenderTest do
 
   @haml ~s{
 !!! 5
-%section.container(class= "blue" style="margin-top: 10px")
+%section.container(class= "blue" style="margin-top: 10px" data-value=@value)
   %article
     %h1= title
     / %h1 An important inline comment
@@ -16,7 +16,7 @@ defmodule CalliopeRenderTest do
 
   @html Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
     <!DOCTYPE html>
-    <section class="container blue" style="margin-top: 10px">
+    <section class="container blue" style="margin-top: 10px" data-value='<%= @value %>'>
       <article>
         <h1><%= title %></h1>
         <!-- <h1>An important inline comment</h1> -->
