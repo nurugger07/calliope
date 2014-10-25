@@ -8,6 +8,9 @@ defmodule CalliopeRenderTest do
 %section.container(class= "blue")
   %article
     %h1= title
+    :javascript
+      var x = 5;
+      var y = 10;
     / %h1 An important inline comment
     /[if IE]
       %h2 An Elixir Haml Parser
@@ -19,6 +22,10 @@ defmodule CalliopeRenderTest do
     <section class="container blue">
       <article>
         <h1><%= title %></h1>
+        <script type="text/javascript">
+          var x = 5;
+          var y = 10;
+        </script>
         <!-- <h1>An important inline comment</h1> -->
         <!--[if IE]> <h2>An Elixir Haml Parser</h2> <![endif]-->
         <div id="main" class="content">

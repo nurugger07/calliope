@@ -16,6 +16,7 @@ defmodule CalliopeParserTest do
       [10, "\t\t", " Welcome to \#{title}"],
       [11, "%section", ".container", "(data-a: 'calliope', data-b: 'awesome')"],
       [12, "\t", "%img", ".one", "{id: 'main_image', class: 'two three', src: url}"],
+      [13, "\t", ":javascript"]
     ]
 
   @parsed_tokens [
@@ -30,7 +31,8 @@ defmodule CalliopeParserTest do
       [ indent: 3, script: " arg", line_number: 9 ],
       [ indent: 2, content: "Welcome to \#{title}", line_number: 10 ],
       [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'", line_number: 11 ],
-      [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'", line_number: 12 ]
+      [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'", line_number: 12 ],
+      [ indent: 1, tag: "script", attributes: "type=\"text/javascript\"", line_number: 13 ]
     ]
 
   @nested_tree [
@@ -53,7 +55,8 @@ defmodule CalliopeParserTest do
         ],
       ],
       [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'", line_number: 11, children: [
-          [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'", line_number: 12]
+          [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'", line_number: 12 ],
+          [ indent: 1, tag: "script", attributes: "type=\"text/javascript\"", line_number: 13 ]
         ]
       ]
     ]
@@ -89,17 +92,9 @@ defmodule CalliopeParserTest do
   end
 
   test :parse_line do
-    assert parsed_tokens(0) == parsed_line_tokens(tokens(0))
-    assert parsed_tokens(1) == parsed_line_tokens(tokens(1))
-    assert parsed_tokens(2) == parsed_line_tokens(tokens(2))
-    assert parsed_tokens(3) == parsed_line_tokens(tokens(3))
-    assert parsed_tokens(4) == parsed_line_tokens(tokens(4))
-    assert parsed_tokens(5) == parsed_line_tokens(tokens(5))
-    assert parsed_tokens(6) == parsed_line_tokens(tokens(6))
-    assert parsed_tokens(7) == parsed_line_tokens(tokens(7))
-    assert parsed_tokens(8) == parsed_line_tokens(tokens(8))
-    assert parsed_tokens(9) == parsed_line_tokens(tokens(9))
-    assert parsed_tokens(10) == parsed_line_tokens(tokens(10))
+    each_token_with_index fn({ token, index }) ->
+      assert parsed_tokens(index) == parsed_line_tokens(token)
+    end
   end
 
   test :build_tree do
@@ -123,6 +118,11 @@ defmodule CalliopeParserTest do
              [2, "\t", "%h1", "Calliope"],
              [3, "\t\t\t", "%h2", "Indent Too Deep" ]])
     end
+
+    msg = "Unknown filter on line number: 1"
+    assert_raise CalliopeException, msg, fn() ->
+      parse([ [1, ":unknown"] ])
+    end
   end
 
   defp tokens(n), do: line(@tokens, n)
@@ -133,4 +133,7 @@ defmodule CalliopeParserTest do
 
   defp line(list, n), do: Enum.fetch!(list, n)
 
+  defp each_token_with_index(function) do
+    Enum.each Enum.with_index(@tokens), function
+  end
 end

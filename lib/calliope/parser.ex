@@ -11,6 +11,7 @@ defmodule Calliope.Parser do
   @comment  "/"
   @script   "="
   @smart    "-"
+  @filter   ":"
 
   def parse([]), do: []
   def parse(l) do
@@ -38,6 +39,7 @@ defmodule Calliope.Parser do
       @comment  -> handle_comment(val) ++ acc
       @script   -> [ script: val ] ++ acc
       @smart    -> [ smart_script: String.strip(val) ] ++ acc
+      @filter   -> handle_filter(acc, val)
       _         -> [ content: String.strip(h) ] ++ acc
     end
     parse_line(t, acc)
@@ -49,6 +51,13 @@ defmodule Calliope.Parser do
       line[:id] -> raise_error :multiple_ids_assigned, line[:line_number]
       true -> [ id: id ] ++ line
     end
+  end
+
+  def handle_filter(line, "javascript") do
+    [ tag: "script", attributes: "type=\"text/javascript\"" ] ++ line
+  end
+  def handle_filter(line, _unknown_filter) do
+    raise_error(:unknown_filter, line[:line_number])
   end
 
   def build_attributes(value) do
