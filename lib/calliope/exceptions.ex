@@ -4,6 +4,7 @@ defmodule CalliopeException do
   def messages do
     [
       too_deep_indent:        "Indentation was too deep on line number: #",
+      unknown_filter:         "Unknown filter on line number: #",
       multiple_ids_assigned:  "tag id is assigned multiple times on line number #",
       unknown:                "Something wicked this way comes"
     ]
