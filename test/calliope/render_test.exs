@@ -5,7 +5,7 @@ defmodule CalliopeRenderTest do
 
   @haml ~s{
 !!! 5
-%section.container(class= "blue")
+%section.container(class= "blue" style="margin-top: 10px" data-value=@value)
   %article
     %h1= title
     :javascript
@@ -19,7 +19,7 @@ defmodule CalliopeRenderTest do
 
   @html Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
     <!DOCTYPE html>
-    <section class="container blue">
+    <section class="container blue" style="margin-top: 10px" data-value='<%= @value %>'>
       <article>
         <h1><%= title %></h1>
         <script type="text/javascript">
