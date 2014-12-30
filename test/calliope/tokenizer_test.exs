@@ -69,12 +69,19 @@ defmodule CalliopeTokenizerTest do
   end
 
   test :tokenize_line do
-    assert [[1, "%section", ".container", ".blue", "{src='#', data='cool'} ", "Calliope"]] ==
-      tokenize("\n%section.container.blue{src='#', data='cool'} Calliope")
-    assert [[1, "%section", ".container", "(src='#', data='cool') ", "Calliope"]] ==
-      tokenize("\n%section.container(src='#', data='cool') Calliope")
+    assert [[1, "%section", ".container", ".blue", "{src:'#', data:'cool'} ", "Calliope"]] ==
+      tokenize("\n%section.container.blue{src:'#', data:'cool'} Calliope")
+    assert [[1, "%section", ".container", "(src='#' data='cool') ", "Calliope"]] ==
+      tokenize("\n%section.container(src='#' data='cool') Calliope")
     assert [[1, "\t", "%a", "{href: \"#\"} ", "Learning about \#{title}"]] ==
       tokenize("\t%a{href: \"#\"} Learning about \#{title}")
+
+    # allowing spaces after the attribute values before closing curly brace
+    assert [[1, "%label", ".cl1", "{ for:  'test', class:  ' cl2' } ", "Label" ]] ==
+      tokenize("%label.cl1{ for:  'test', class:  ' cl2' } Label")
+
+    assert [[1, "%label", "{ for: \"\#{@id}\", class: \"\#{@class}\" } ", "Label" ]] ==
+      tokenize("%label{ for: \"\#{@id}\", class: \"\#{@class}\" } Label")
   end
 
   test :tokenize_identation do

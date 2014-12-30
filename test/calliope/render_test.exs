@@ -14,6 +14,7 @@ defmodule CalliopeRenderTest do
     / %h1 An important inline comment
     /[if IE]
       %h2 An Elixir Haml Parser
+    %label.cl1\{ for:  "test", class: " cl2"  \} Label
     #main.content
       Welcome to Calliope}
 
@@ -28,6 +29,7 @@ defmodule CalliopeRenderTest do
         </script>
         <!-- <h1>An important inline comment</h1> -->
         <!--[if IE]> <h2>An Elixir Haml Parser</h2> <![endif]-->
+        <label class="cl1 cl2" for="test">Label</label>
         <div id="main" class="content">
           Welcome to Calliope
         </div>
@@ -47,7 +49,7 @@ defmodule CalliopeRenderTest do
   test :eval do
     result = "<a href='http://example.com'>Example</a>"
     assert result == render "%a{href: 'http://example.com'} Example" |> eval []
-    assert result == render(~s{%a(href: 'http://example.com')= "Example"}) |> eval [conn: []]
+    assert result == render(~s(%a{href: 'http://example.com'}= "Example")) |> eval [conn: []]
   end
 
   test :render_with_params do

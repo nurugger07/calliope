@@ -103,6 +103,7 @@ defmodule CalliopeParserTest do
 
   test :build_attributes do
     assert "class='#\{@class_name}'" == build_attributes("class: @class_name }")
+    assert "for='name'" == build_attributes("for:  'name' }")
     assert "class='#\{@class_name}'" == build_attributes("class=@class_name }")
     assert "style='margin-top: 5px'" == build_attributes("style: 'margin-top: 5px' }")
     assert "style=\"margin-top: 5px\"" == build_attributes("style: \"margin-top: 5px\" }")
