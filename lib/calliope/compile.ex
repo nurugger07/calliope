@@ -17,12 +17,22 @@ defmodule Calliope.Compiler do
   def compile([]), do: ""
   def compile(nil), do: ""
   def compile([h|t]) do
-    build_html(h) <> compile(t)
+    build_html(h,t) <> compile(t)
   end
 
-  defp build_html(node) do
+  defp build_html(node, []) do
+    build_html(node, [[]])
+  end
+  defp build_html(node, [next_node|_]) do
     cond do
-      node[:smart_script] -> evaluate_smart_script(node[:smart_script], node[:children])
+      node[:smart_script] -> 
+        cond do
+          next_node[:smart_script] ->
+            # send next code to look ahead for things like else
+            evaluate_smart_script(node[:smart_script], node[:children], next_node[:smart_script])
+          true ->  
+            evaluate_smart_script(node[:smart_script], node[:children], "")
+        end
       true -> evaluate(node)
     end
   end
@@ -32,45 +42,50 @@ defmodule Calliope.Compiler do
       open(compile_attributes(line), tag(line)) <>
         precompile_content("#{line[:content]}") <>
         evaluate_script(line[:script]) <>
-        compile(line[:children]) <>
+        compile(line[:children]) <>      
       close(tag(line)) <>
     comment(line[:comment], :close)
   end
 
   def evaluate_smart_script("#" <> _, _, _), do: ""
-  def evaluate_smart_script(script, children) do
-    smart_script_to_string(script, children)
+  def evaluate_smart_script(script, children, next_node) do
+    smart_script_to_string(script, children, next_node)
   end
 
   def evaluate_script(nil), do: ""
   def evaluate_script(script) when is_binary(script), do: "<%= #{String.lstrip(script)} %>"
 
-  defp smart_script_to_string("for" <> script, children) do
-    [cmd, inline] = Regex.split(~r/do:?/, script)
+  defp smart_script_to_string("if" <> script, children, "else") do
+    %{cmd: cmd, end_tag: end_tag} = handle_script("if" <> script)
     """
-      <%= for#{cmd}do %>
-        #{inline}
-        #{compile(children)}
-      <%= end %>
-    """ |> String.strip
+    <%= #{cmd} #{end_tag}
+      #{compile children}
+    """
+  end
+  defp smart_script_to_string("unless" <> script, children, "else") do
+    %{cmd: cmd, end_tag: end_tag} = handle_script("unless" <> script)
+    """
+    <%= #{cmd} #{end_tag}
+      #{compile children}
+    """
+  end
+  defp smart_script_to_string("else", children, _) do
+    %{cmd: cmd, end_tag: end_tag} = handle_script("else")
+    """
+    <% #{cmd} #{end_tag}
+      #{compile children}
+    <% end %>
+    """
   end
 
-  defp smart_script_to_string(script, children) do
-    %{cmd: cmd, fun_sign: fun_sign, wraps_end: wraps_end} = cond do
-      String.starts_with?(script, "cond") ->
-        handle_cond_do(script)
-      length(Regex.scan(~r/->/, script)) > 0 ->
-        handle_arrow(script)
-      true ->
-        raise "Not implemented operator:\n #{script}"
-    end
-
+  defp smart_script_to_string(script, children, _ ) do
+    %{cmd: cmd, wraps_end: wraps_end, open_tag: open_tag,
+      end_tag: end_tag} = handle_script(script)
     """
-      <%= #{cmd}#{fun_sign} %>
-        #{compile(children)}
-      #{wraps_end}
+    #{open_tag} #{cmd} #{end_tag}
+      #{compile children}
+    #{wraps_end}
     """
-    |> String.strip
   end
 
   def precompile_content(nil), do: nil
@@ -127,14 +142,14 @@ defmodule Calliope.Compiler do
   defp has_any_key?( _, []), do: false
   defp has_any_key?(list, [h|t]), do: Keyword.has_key?(list, h) || has_any_key?(list, t)
 
-  defp handle_cond_do(script) do
-    # cond or case operator DOESN'T have inline verion, e.g.: cond, do: true -> "truly"
-    [cmd] = Regex.split(~r/do:?/, script, trim: true)
-    %{cmd: cmd, fun_sign: "do", wraps_end: "<%= end %>"}
-  end
-
-  defp handle_arrow(script) do
-    [cmd] = Regex.split(~r/->:?$/, script, trim: true)
-    %{cmd: cmd, fun_sign: "->", wraps_end: ""}
+  defp handle_script(script) do
+    cond do
+      Regex.match? ~r/(fn )|(fn\()[a-zA-Z0-9,\) ]+->/, script ->
+        %{cmd: script, wraps_end: "end) %>", end_tag: "\n", open_tag: "<%="}
+      Regex.match? ~r/ do:?/, script -> 
+        %{cmd: script, wraps_end: "<% end %>", end_tag: "%>", open_tag: "<%="}
+      true ->
+        %{cmd: script, wraps_end: "", end_tag: "%>", open_tag: "<%"}
+    end
   end
 end
