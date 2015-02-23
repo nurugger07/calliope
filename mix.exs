@@ -5,7 +5,7 @@ defmodule Calliope.Mixfile do
 
   def project do
     [ app: :calliope,
-      version: "0.2.8",
+      version: "0.3.0",
       elixir: ">= 1.0.0",
       deps: [],
       package: [

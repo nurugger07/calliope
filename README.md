@@ -36,7 +36,7 @@ Calliope is simple to add to any project. If you are using the hex package manag
 
 ``` elixir
 def deps do
-  [ { :calliope, '~> 0.2.5' } ]
+  [ { :calliope, '~> 0.3.0' } ]
 end
 ```
 
@@ -257,6 +257,5 @@ In addition to `:layout`, you can also set the following options:
 
 ## Coming Soon
 
-* Rendering Elixir conditionals
 * Rendering partials
 * Exception messages
