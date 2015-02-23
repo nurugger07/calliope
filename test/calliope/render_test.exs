@@ -62,4 +62,49 @@ defmodule CalliopeRenderTest do
       render @haml_with_args, [ url: "http://google.com", title: "Google" ]
   end
 
+  test :local_variable do
+
+    expected = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+      <% var = "test" %>
+      <p><%= var %></p>}, "")
+
+    haml = """
+- var = "test"
+%p= var
+"""
+    assert expected == Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, render(haml), "")
+  end
+
+  test :case_evaluation do
+    haml = """
+- case @var do
+  -  nil -> 
+    %p Found nil value
+  - other ->
+    %p Found other: 
+      = other
+"""
+
+    expected = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
+<%= case @var do %>
+  <% nil -> %> 
+    <p>Found nil value</p>
+  <% other -> %>
+    <p>Found other: 
+      <%= other %></p>
+<% end %>}, "")
+    assert expected == Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, render(haml), "")
+  end
+
+  test :else_result do
+    haml = """
+- if false do
+  %p true
+- else 
+  %p false
+"""
+    actual = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, EEx.eval_string(render(haml), []), "")
+    assert actual == "<p>false</p>" 
+  end
+
 end

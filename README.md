@@ -138,10 +138,12 @@ Calliope will render:
 
 Calliope doesn't just evaluate arguments, you can actually embed Elixir directly into the templates:
 
+### for
+
 ``` haml
 - for { id, headline, content } <- posts do
   %h1
-    %a{href: "posts/#{id}"= headline
+    %a{href: "posts/#{id}"}= headline
   .content
     = content
 ```
@@ -167,6 +169,47 @@ Will render
 <div class="content">
   Content 2
 </div>
+```
+
+### if, else, and unless
+
+``` haml
+- if post do 
+  %h1= post.title
+  - if post.comments do
+    %p Has some comments
+  - else
+    %p No Comments
+- unless user_guest(user)
+  %a{href: "posts/edit/#{id}"}= Edit
+```
+
+### case
+
+``` haml
+- case example do
+  - "one" -> 
+    %p Example one
+  - other -> 
+    %p Other Example  
+      #{other}
+```
+
+### Local Variables
+
+``` haml
+- answer = 42
+%p= "What is the answer #{answer}"
+```
+
+### Multi-line Anonymous Functions
+
+``` haml
+- for item <- items do
+  - ExForm.form_for(item, "/", fn(f) ->
+    f
+    |> ExForm.input(:name)
+    |> ExForm.submit("save")
 ```
 
 ## Precompile Templates
