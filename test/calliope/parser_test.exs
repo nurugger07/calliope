@@ -131,8 +131,6 @@ defmodule CalliopeParserTest do
     end
   end
 
-  defp tokens(n), do: line(@tokens, n)
-
   defp parsed_tokens(n), do: Enum.sort line(@parsed_tokens, n)
 
   defp parsed_line_tokens(tokens), do: Enum.sort parse_line(tokens)
