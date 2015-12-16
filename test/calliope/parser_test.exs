@@ -91,6 +91,14 @@ defmodule CalliopeParserTest do
     assert parsed_handle_bars == parse handle_bars
   end
 
+  test :parse_with_no_space_after_tag do
+    assert [[attributes: "foo", tag: "h1", line_number: 1]] == parse([[1, "%h1", "(foo)"]])
+  end
+
+  test :parse_with_space_after_tag do
+    assert [[content: "(foo)", tag: "h1", line_number: 1]] == parse([[1, "%h1 ", " (foo)"]])
+  end
+
   test :parse_line do
     each_token_with_index fn({ token, index }) ->
       assert parsed_tokens(index) == parsed_line_tokens(token)
