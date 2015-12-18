@@ -52,26 +52,24 @@ defmodule CalliopeIntegerationTest do
     assert actual == "<p>true</p>" 
   end
 
-  @haml """
-- unless true do
+  @haml ~S(- unless true do
   %p false
 - else 
   %p true
-"""
+)
   test :unless_result_with_else do
-    actual = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, EEx.eval_string(render(@haml), []), "")
-    assert actual == "<p>true</p>" 
+    actual = EEx.eval_string(render(@haml), [])
+    assert actual == "\n<p>true</p>\n" 
   end
  
-  @haml ~S(
-- answer = "42"
+  @haml ~S(- answer = "42"
 %p
   The answer is
   = " #{answer}"
 )
   test :local_variable do
-    actual = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, EEx.eval_string(render(@haml), []), "")
-    assert actual == "<p>The answer is 42</p>"
+    actual = EEx.eval_string(render(@haml), [])
+    assert actual == "<p>\n  The answer is\n   42\n</p>\n"
   end
 
   @haml ~S(
@@ -95,5 +93,55 @@ defmodule CalliopeIntegerationTest do
   test :case_evaluation do
     actual = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, EEx.eval_string(render(@haml), []), "")
     assert actual == "<p>Got two</p>"
+  end
+
+  @haml ~S(
+.simple_div
+    %b Label:
+    Content
+Outside the div
+)
+  @expected ~S(<div class="simple_div">
+  <b>Label:</b>
+  Content
+</div>
+Outside the div
+)
+  test :preserves_newlines do
+    assert EEx.eval_string(render(@haml), []) == @expected
+  end
+
+
+  @haml ~s{!!! 5
+%section.container
+  %h1
+    = arg
+  <!-- <h1>An important inline comment</h1> -->
+  <!--[if IE]> <h2>An Elixir Haml Parser</h2> <![endif]-->
+  #main.content
+    Welcome to Calliope
+    %br
+%section.container
+  %img(src='#')
+}
+
+  @expected ~s{<!DOCTYPE html>
+<section class="container">
+  <h1>
+    <%= arg %>
+  </h1>
+  <!-- <h1>An important inline comment</h1> -->
+  <!--[if IE]> <h2>An Elixir Haml Parser</h2> <![endif]-->
+  <div id="main" class="content">
+    Welcome to Calliope
+    <br>
+  </div>
+</section>
+<section class="container">
+  <img src='#'>
+</section>
+}
+  test :preserves_newlines_with_comments do
+    assert render(@haml) == @expected
   end
 end
