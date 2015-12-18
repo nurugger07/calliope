@@ -166,11 +166,12 @@ defmodule Calliope.Compiler do
   defp has_any_key?(list, [h|t]), do: Keyword.has_key?(list, h) || has_any_key?(list, t)
 
   defp handle_script(script) do
+    ch = if Regex.match?(~r/^[A-Za-z0-9\?!_\.]+\(/, script), do: ")", else: ""
     cond do
       Regex.match? ~r/(fn )|(fn\()[a-zA-Z0-9,\) ]+->/, script ->
-        %{cmd: script, wraps_end: "end) %>", end_tag: "\n", open_tag: "<%="}
+        %{cmd: script, wraps_end: "<% end#{ch} %>", end_tag: "%>", open_tag: "<%="}
       Regex.match? ~r/ do:?/, script -> 
-        %{cmd: script, wraps_end: "<% end %>", end_tag: "%>", open_tag: "<%="}
+        %{cmd: script, wraps_end: "<% end#{ch} %>", end_tag: "%>", open_tag: "<%="}
       true ->
         %{cmd: script, wraps_end: "", end_tag: "%>", open_tag: "<%"}
     end

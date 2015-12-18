@@ -103,5 +103,4 @@ defmodule CalliopeRenderTest do
     actual = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, EEx.eval_string(render(haml), []), "")
     assert actual == "<p>false</p>" 
   end
-
 end

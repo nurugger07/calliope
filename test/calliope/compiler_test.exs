@@ -218,29 +218,6 @@ defmodule CalliopeCompilerTest do
     compiled_results = compile(parsed_tokens)
     assert expected_results == compiled_results
   end
-  test :compile_nexted_with_fn do
-    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
-      <%= for item <- items do %>
-        <%= ExForm.form_for(item, "/" fn(f) -> 
-          f
-          |> ExForm.input(:name)
-          |> ExForm.submit("save")
-         end) %>
-      <% end %>}, "")
-
-    parsed_tokens = [
-      [smart_script: "for item <- items do", line_number: 1, children: [
-        [smart_script: "ExForm.form_for(item, \"/\" fn(f) -> ", indent: 1, line_number: 2, children: [
-          [content: "f", indent: 2, line_number: 3],
-          [content: "|> ExForm.input(:name)", indent: 2, line_number: 4],
-          [content: "|> ExForm.submit(\"save\")", indent: 2, line_number: 5]]]
-        ]
-      ]
-    ]
-
-    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
-    assert expected_results == compiled_results
-  end
 
   test :compile_local_variables do
     expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
@@ -275,4 +252,42 @@ defmodule CalliopeCompilerTest do
     assert compile(parsed_tokens) == expected
   end
 
+  @expected ~s[<%= form_for @changeset, @action, fn f -> %>
+<div class=\"test\"></div>
+
+<% end %>]
+
+  test :render_anonymous_functions do
+    parsed_tokens = [
+      [smart_script: "form_for @changeset, @action, fn f ->", line_number: 1,
+        children: [[line_number: 2, indent: 1, classes: ["test"]]]]
+    ]
+    assert compile(parsed_tokens) == @expected
+  end
+
+  @expected ~s[<%= form_for @changeset, @action, fn(f) -> %>
+<div class=\"test\"></div>
+
+<% end %>]
+
+  test :render_anonymous_function_parens do
+    parsed_tokens = [
+      [smart_script: "form_for @changeset, @action, fn(f) ->", line_number: 1,
+        children: [[line_number: 2, indent: 1, classes: ["test"]]]]
+    ]
+    assert compile(parsed_tokens) == @expected
+  end
+
+  @expected ~s[<%= form_for(@changeset, @action, fn(f) -> %>
+<div class=\"test\"></div>
+
+<% end) %>]
+
+  test :render_anonymous_functions_parens_2 do
+    parsed_tokens = [
+      [smart_script: "form_for(@changeset, @action, fn(f) ->", line_number: 1,
+        children: [[line_number: 2, indent: 1, classes: ["test"]]]]
+    ]
+    assert compile(parsed_tokens) == @expected
+  end
 end

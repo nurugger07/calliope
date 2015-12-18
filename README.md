@@ -202,14 +202,15 @@ Will render
 %p= "What is the answer #{answer}"
 ```
 
-### Multi-line Anonymous Functions
+### Anonymous Functions
 
 ``` haml
-- for item <- items do
-  - ExForm.form_for(item, "/", fn(f) ->
-    f
-    |> ExForm.input(:name)
-    |> ExForm.submit("save")
+- form_for @changeset, @action, fn f ->
+  .form-group
+    = label f, :name, "Name", class: "control-label" 
+    = text_input f, :name, class: "form-control" 
+  .form-group
+    = submit "Submit", class: "btn btn-primary" 
 ```
 
 ## Precompile Templates
