@@ -17,7 +17,7 @@ defmodule Calliope.Safe do
     evaluate_script(args, script)
   end
   def eval_safe_script(script, args) do
-    clean args |> evaluate_script script
+    evaluate_script(args, script) |> clean
   end
 
   def evaluate_script(args, script) do

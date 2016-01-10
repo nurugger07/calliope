@@ -46,8 +46,8 @@ defmodule CalliopeRenderTest do
 
   test :eval do
     result = "<a href='http://example.com'>Example</a>\n"
-    assert result == render "%a{href: 'http://example.com'} Example" |> eval []
-    assert result == render(~s(%a{href: 'http://example.com'}= "Example")) |> eval [conn: []]
+    assert result == eval("%a{href: 'http://example.com'} Example", []) |> render
+    assert result == render(~s(%a{href: 'http://example.com'}= "Example")) |> eval(conn: [])
   end
 
   test :render_with_params do
@@ -75,7 +75,7 @@ defmodule CalliopeRenderTest do
 
   test :case_evaluation do
     haml = ~s{- case @var do
-  -  nil -> 
+  - nil ->
     %p Found nil value
   - other ->
     %p Found other: 
