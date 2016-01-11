@@ -11,10 +11,8 @@ defmodule CalliopeCompilerTest do
           ]
         ],
         [ indent: 1, tag: "h1",  comment: "!--", content: "An important inline comment" ],
-        [ indent: 1, comment: "!--[if IE]", children: [
-            [ indent: 1, tag: "h2", content: "An Elixir Haml Parser"]
-          ]
-        ],
+        [content: "<!--[if IE]> <h2>An Elixir Haml Parser</h2> <![endif]-->",
+            indent: 1, line_number: 6],
         [ indent: 1, id: "main", classes: ["content"], children: [
             [ indent: 2, content: "Welcome to Calliope" ],
             [ indent: 2, tag: "br" ]
@@ -28,24 +26,22 @@ defmodule CalliopeCompilerTest do
     ]
   ]
 
-  @html Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
-    <!DOCTYPE html>
-    <section class="container">
-      <h1>
-        <%= arg %>
-      </h1>
-      <!-- <h1>An important inline comment</h1> -->
-      <!--[if IE]> <h2>An Elixir Haml Parser</h2> <![endif]-->
-      <div id="main" class="content">
-        Welcome to Calliope
-        <br>
-      </div>
-    </section>
-    <section class="container">
-      <img src='#'>
-    </section>
-  }, "")
-
+  @html ~s{<!DOCTYPE html>
+<section class="container">
+  <h1>
+    <%= arg %>
+  </h1>
+  <!-- <h1>An important inline comment</h1> -->
+  <!--[if IE]> <h2>An Elixir Haml Parser</h2> <![endif]-->
+  <div id="main" class="content">
+    Welcome to Calliope
+    <br>
+  </div>
+</section>
+<section class="container">
+  <img src='#'>
+</section>
+}
 
   @smart [[smart_script: "for { id, content } <- posts do", children: [
               [indent: 1, tag: "div", children: [[indent: 2, script: "content"]]]
@@ -110,13 +106,13 @@ defmodule CalliopeCompilerTest do
   end
 
   test :compile do
-     assert ~s{<div id="test"></div>} == compile([[id: "test"]])
-     assert ~s{<section id="test" class="content"></section>} == compile([[tag: "section", id: "test", classes: ["content"]]])
+     assert ~s{<div id="test"></div>\n} == compile([[id: "test"]])
+     assert ~s{<section id="test" class="content"></section>\n} == compile([[tag: "section", id: "test", classes: ["content"]]])
 
      children = [[classes: ["nested"]]]
-     assert ~s{<div id="test"><div class="nested"></div></div>} == compile([[id: "test", children: children]])
+     assert ~s{<div id="test">\n<div class="nested"></div>\n</div>\n} == compile([[id: "test", children: children]])
 
-     assert ~s{content} == compile([[content: "content"]])
+     assert ~s{content} <> "\n" == compile([[content: "content"]])
 
      assert @html == compile(@ast)
   end
@@ -209,42 +205,17 @@ defmodule CalliopeCompilerTest do
   end
 
   test :compile_with_unless_else_evaluation do
-    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
-      <%= unless test > 5 do %>
-         <p>No1</p>
-      <% else %>
-         <p>No2</p>
-      <% end %>}, "")
+    expected_results = ~s{<%= unless test > 5 do %>
+  <p>No1</p>
+<% else %>
+  <p>No2</p>
+<% end %>}
 
     parsed_tokens = [
       [ indent: 1, smart_script: "unless test > 5 do", children: [[ indent: 2, tag: "p", content: "No1" ]]],
       [ indent: 1, smart_script: "else", children: [[indent: 2, tag: "p", content: "No2" ]]]
     ]
-    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
-
-    assert expected_results == compiled_results
-  end
-  test :compile_nexted_with_fn do
-    expected_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, ~s{
-      <%= for item <- items do %>
-        <%= ExForm.form_for(item, "/" fn(f) -> 
-          f
-          |> ExForm.input(:name)
-          |> ExForm.submit("save")
-         end) %>
-      <% end %>}, "")
-
-    parsed_tokens = [
-      [smart_script: "for item <- items do", line_number: 1, children: [
-        [smart_script: "ExForm.form_for(item, \"/\" fn(f) -> ", indent: 1, line_number: 2, children: [
-          [content: "f", indent: 2, line_number: 3],
-          [content: "|> ExForm.input(:name)", indent: 2, line_number: 4],
-          [content: "|> ExForm.submit(\"save\")", indent: 2, line_number: 5]]]
-        ]
-      ]
-    ]
-
-    compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
+    compiled_results = compile(parsed_tokens)
     assert expected_results == compiled_results
   end
 
@@ -259,5 +230,64 @@ defmodule CalliopeCompilerTest do
     ] 
     compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
     assert expected_results == compiled_results
+  end
+
+  test :preserves_indentation_and_new_lines do
+    expected = "  <div>\n    <b>Test</b>\n  </div>\n"
+    parsed_tokens = [
+      [ indent: 1, tag: "div", line_number: 1, children: [
+          [ indent: 2, tag: "b", content: "Test", line_number: 2]
+        ]
+      ]
+    ]
+    assert expected == compile(parsed_tokens)
+  end
+  
+  test :preserves_indentation_and_new_lines_2 do
+    expected = "<div class=\"simple_div\">\n  <b>Label:</b>\n  Content\n</div>\nOutside the div\n"
+    parsed_tokens = [[ line_number: 1, classes: ["simple_div"], children: [
+      [content: "Label:", tag: "b", indent: 1, line_number: 2],
+      [content: "Content", indent: 1, line_number: 3]]],
+      [content: "Outside the div", line_number: 4]]
+    assert compile(parsed_tokens) == expected
+  end
+
+  @expected ~s[<%= form_for @changeset, @action, fn f -> %>
+<div class=\"test\"></div>
+
+<% end %>]
+
+  test :render_anonymous_functions do
+    parsed_tokens = [
+      [smart_script: "form_for @changeset, @action, fn f ->", line_number: 1,
+        children: [[line_number: 2, indent: 1, classes: ["test"]]]]
+    ]
+    assert compile(parsed_tokens) == @expected
+  end
+
+  @expected ~s[<%= form_for @changeset, @action, fn(f) -> %>
+<div class=\"test\"></div>
+
+<% end %>]
+
+  test :render_anonymous_function_parens do
+    parsed_tokens = [
+      [smart_script: "form_for @changeset, @action, fn(f) ->", line_number: 1,
+        children: [[line_number: 2, indent: 1, classes: ["test"]]]]
+    ]
+    assert compile(parsed_tokens) == @expected
+  end
+
+  @expected ~s[<%= form_for(@changeset, @action, fn(f) -> %>
+<div class=\"test\"></div>
+
+<% end) %>]
+
+  test :render_anonymous_functions_parens_2 do
+    parsed_tokens = [
+      [smart_script: "form_for(@changeset, @action, fn(f) ->", line_number: 1,
+        children: [[line_number: 2, indent: 1, classes: ["test"]]]]
+    ]
+    assert compile(parsed_tokens) == @expected
   end
 end

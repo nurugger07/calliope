@@ -1,5 +1,7 @@
 defmodule Calliope.Compiler do
 
+  @nl "\n"
+  @indent_size 2
   @attributes   [ :id, :classes, :attributes ]
   @self_closing [ "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr" ]
 
@@ -14,79 +16,99 @@ defmodule Calliope.Compiler do
     { :"!!! RDFa", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML+RDFa 1.0//EN\" \"http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd\">" }
   ]
 
-  def compile([]), do: ""
-  def compile(nil), do: ""
-  def compile([h|t]) do
-    build_html(h,t) <> compile(t)
+  def compile(list, smart_indent \\ 0)
+  def compile([], _si), do: ""
+  def compile(nil, _si), do: ""
+  def compile([h|t], si) do
+    build_html(h,t, si) <> compile(t, si)
   end
 
-  defp build_html(node, []) do
-    build_html(node, [[]])
+  defp build_html(node, [], si) do
+    build_html(node, [[]], si)
   end
-  defp build_html(node, [next_node|_]) do
+  defp build_html(node, [next_node|_], si) do
     cond do
       node[:smart_script] -> 
         cond do
           next_node[:smart_script] ->
             # send next code to look ahead for things like else
-            evaluate_smart_script(node[:smart_script], node[:children], next_node[:smart_script])
+            evaluate_smart_script(node[:smart_script], node[:children], next_node[:smart_script], si)
           true ->  
-            evaluate_smart_script(node[:smart_script], node[:children], "")
+            evaluate_smart_script(node[:smart_script], node[:children], "", si)
         end
-      true -> evaluate(node)
+      true -> evaluate(node, si)
     end
   end
 
-  def evaluate(line) do
+  def evaluate(line, si) do
+    leader(line, si) <>
     comment(line[:comment], :open) <>
       open(compile_attributes(line), tag(line)) <>
+        add_newline(line) <>
         precompile_content("#{line[:content]}") <>
         evaluate_script(line[:script]) <>
-        compile(line[:children]) <>      
-      close(tag(line)) <>
-    comment(line[:comment], :close)
+        compile(line[:children], si) <>
+      close(tag(line), leader_close(line, si)) <>
+    comment(line[:comment], :close) <> @nl
   end
 
-  def evaluate_smart_script("#" <> _, _, _), do: ""
-  def evaluate_smart_script(script, children, next_node) do
-    smart_script_to_string(script, children, next_node)
+  defp add_newline(line) do
+    case line[:children] do
+      nil -> ""
+      [] -> ""
+      _ -> @nl
+    end
+  end
+
+  defp leader(line, si) do
+    case line[:indent] do
+      nil   -> ""
+      value -> String.rjust("", (value - si) * @indent_size)
+    end
+  end
+
+  defp leader_close(line, si) do
+    case line[:children] do
+      nil -> ""
+      []  -> ""
+      _   -> leader(line, si)
+    end
+  end
+
+  def evaluate_smart_script("#" <> _, _, _, _), do: ""
+  def evaluate_smart_script(script, children, next_node, si) do
+    smart_script_to_string(script, children, next_node, si)
   end
 
   def evaluate_script(nil), do: ""
   def evaluate_script(script) when is_binary(script), do: "<%= #{String.lstrip(script)} %>"
 
-  defp smart_script_to_string("if" <> script, children, "else") do
+  defp smart_script_to_string("if" <> script, children, "else", si) do
     %{cmd: cmd, end_tag: end_tag} = handle_script("if" <> script)
-    """
-    <%= #{cmd} #{end_tag}
-      #{compile children}
-    """
+    "<%= #{cmd} #{end_tag}" <> smart_children(children, si + 1)
   end
-  defp smart_script_to_string("unless" <> script, children, "else") do
+  defp smart_script_to_string("unless" <> script, children, "else", si) do
     %{cmd: cmd, end_tag: end_tag} = handle_script("unless" <> script)
-    """
-    <%= #{cmd} #{end_tag}
-      #{compile children}
-    """
+    "<%= #{cmd} #{end_tag}" <> smart_children(children, si + 1)
   end
-  defp smart_script_to_string("else", children, _) do
+  defp smart_script_to_string("else", children, _, si) do
     %{cmd: cmd, end_tag: end_tag} = handle_script("else")
-    """
-    <% #{cmd} #{end_tag}
-      #{compile children}
-    <% end %>
-    """
+    "<% #{cmd} #{end_tag}" <> smart_children(children, si + 1) <> "<% end %>"
   end
 
-  defp smart_script_to_string(script, children, _ ) do
+  defp smart_script_to_string(script, children, _, si) do
     %{cmd: cmd, wraps_end: wraps_end, open_tag: open_tag,
       end_tag: end_tag} = handle_script(script)
-    """
-    #{open_tag} #{cmd} #{end_tag}
-      #{compile children}
-    #{wraps_end}
-    """
+    "#{open_tag} #{cmd} #{end_tag}" <> smart_children(children, si + 1) <> smart_wraps_end(wraps_end)
   end
+
+  defp smart_children(nil, _), do: ""
+  defp smart_children([], _), do: ""
+  defp smart_children(children, si), do: "\n#{compile children, si}"
+
+  defp smart_wraps_end(""), do: ""
+  defp smart_wraps_end(nil), do: ""
+  defp smart_wraps_end(wraps_end), do: "\n#{wraps_end}"
 
   def precompile_content(nil), do: nil
   def precompile_content(content) do
@@ -110,10 +132,11 @@ defmodule Calliope.Compiler do
   def open( _, "!!!" <> key), do: @doctypes[:"!!!#{key}"]
   def open(attributes, tag_value), do: "<#{tag_value}#{attributes}>"
 
-  def close(nil), do: ""
-  def close("!!!" <> _), do: ""
-  def close(tag_value) when tag_value in @self_closing, do: ""
-  def close(tag_value), do: "</#{tag_value}>"
+  def close(tag, leader \\ "")
+  def close(nil, _leader), do: ""
+  def close("!!!" <> _, _leader), do: ""
+  def close(tag_value, _leader) when tag_value in @self_closing, do: ""
+  def close(tag_value, leader), do: leader <> "</#{tag_value}>"
 
   def compile_attributes(list) do
     Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1])) |>
@@ -143,11 +166,12 @@ defmodule Calliope.Compiler do
   defp has_any_key?(list, [h|t]), do: Keyword.has_key?(list, h) || has_any_key?(list, t)
 
   defp handle_script(script) do
+    ch = if Regex.match?(~r/^[A-Za-z0-9\?!_\.]+\(/, script), do: ")", else: ""
     cond do
       Regex.match? ~r/(fn )|(fn\()[a-zA-Z0-9,\) ]+->/, script ->
-        %{cmd: script, wraps_end: "end) %>", end_tag: "\n", open_tag: "<%="}
+        %{cmd: script, wraps_end: "<% end#{ch} %>", end_tag: "%>", open_tag: "<%="}
       Regex.match? ~r/ do:?/, script -> 
-        %{cmd: script, wraps_end: "<% end %>", end_tag: "%>", open_tag: "<%="}
+        %{cmd: script, wraps_end: "<% end#{ch} %>", end_tag: "%>", open_tag: "<%="}
       true ->
         %{cmd: script, wraps_end: "", end_tag: "%>", open_tag: "<%"}
     end
