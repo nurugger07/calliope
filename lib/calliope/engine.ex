@@ -55,11 +55,11 @@ defmodule Calliope.Engine do
       end
 
       def content_with_layout(name, args) do
-        content_for(name, args) |> layout_for args
+        content_for(name, args) |> layout_for(args)
       end
 
       def content_for(:none, args) do
-        Keyword.get(args, :yield, "") |> Calliope.Render.eval args
+        Keyword.get(args, :yield, "") |> Calliope.Render.eval(args)
       end
     end
   end
@@ -76,7 +76,7 @@ defmodule Calliope.Engine do
     quote do: unquote files_for(path) |> haml_views |> view_to_function(path)
   end
 
-  def build_path_for(list), do: Enum.filter(list, fn(x) -> is_binary x end) |> Enum.join "/"
+  def build_path_for(list), do: Enum.filter(list, fn(x) -> is_binary x end) |> Enum.join("/")
 
   def eval_path(path) do
     { path, _ } = Code.eval_quoted path
