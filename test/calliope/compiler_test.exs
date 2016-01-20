@@ -227,7 +227,7 @@ defmodule CalliopeCompilerTest do
     parsed_tokens = [
       [smart_script: "test = \"testing\"", line_number: 1],
       [script: " test", line_number: 2]
-    ] 
+    ]
     compiled_results = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, compile(parsed_tokens), "")
     assert expected_results == compiled_results
   end
@@ -242,7 +242,7 @@ defmodule CalliopeCompilerTest do
     ]
     assert expected == compile(parsed_tokens)
   end
-  
+
   test :preserves_indentation_and_new_lines_2 do
     expected = "<div class=\"simple_div\">\n  <b>Label:</b>\n  Content\n</div>\nOutside the div\n"
     parsed_tokens = [[ line_number: 1, classes: ["simple_div"], children: [
