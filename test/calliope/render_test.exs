@@ -46,8 +46,8 @@ defmodule CalliopeRenderTest do
 
   test :eval do
     result = "<a href='http://example.com'>Example</a>\n"
-    assert result == render "%a{href: 'http://example.com'} Example" |> eval []
-    assert result == render(~s(%a{href: 'http://example.com'}= "Example")) |> eval [conn: []]
+    assert result == render "%a{href: 'http://example.com'} Example" |> eval([])
+    assert result == render(~s(%a{href: 'http://example.com'}= "Example")) |> eval([conn: []])
   end
 
   test :render_with_params do
