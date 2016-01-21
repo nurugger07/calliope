@@ -68,8 +68,27 @@ defmodule Calliope.Parser do
       String.replace(~r/[:=]\s?(?!.*["'])(@?\w+)\s?/, "='#\{\\1}'") |>
       String.replace(~r/[})]$/, "") |>
       String.replace(~r/"(.+?)"\s=>\s(@?\w+)\s?/, "\\1='#\{\\2}'") |>
-      String.replace(~r/,\s?/, " ") |>
+      filter_commas |>
       String.strip
+  end
+  def filter_commas(string) do
+    state = String.to_char_list(string)
+    |> Enum.reduce(%{last: 0, buffer: [], ignore: false}, fn(ch, state) ->
+      {char, ignore} = case [state[:last], ch] do
+        '#\{' ->
+          {ch, true}
+        [_,?}]  ->
+          {ch, false}
+        _ when ch == ?, ->
+          if state[:ignore], do: {ch, true}, else: {0, false}
+        _ ->
+          {ch, state[:ignore]}
+      end
+      buffer = unless char == 0, do: [char | state[:buffer]], else: state[:buffer]
+      %{last: ch, ignore: ignore, buffer: buffer}
+    end)
+    Enum.reverse(state[:buffer])
+    |> List.to_string
   end
 
   def build_tree([]), do: []

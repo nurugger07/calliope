@@ -118,6 +118,7 @@ defmodule CalliopeParserTest do
     assert "href='http://google.com'" == build_attributes("href: 'http://google.com' }")
     assert "src='#\{url}'" == build_attributes("src: url }")
     assert "some-long-value='#\{@value}'" == build_attributes("\"some-long-value\" => @value }")
+    assert "href=\"#\{fun(one, two)}\" style='abc: 1'" == build_attributes("href: \"\#{fun(one, two)}\", style: 'abc: 1'}")
   end
 
   test :haml_exceptions do
@@ -137,6 +138,14 @@ defmodule CalliopeParserTest do
     assert_raise CalliopeException, msg, fn() ->
       parse([ [1, ":unknown"] ])
     end
+  end
+
+  test :function_in_attributes do
+    tokens = [[1, "%a", "{href: '\#{page_path(conn, 1)}'}", " Link"]]
+    expected = [
+      [content: "Link", attributes: "href='\#{page_path(conn, 1)}'", tag: "a", line_number: 1]
+    ]
+    assert parse(tokens) == expected
   end
 
   defp parsed_tokens(n), do: Enum.sort line(@parsed_tokens, n)
