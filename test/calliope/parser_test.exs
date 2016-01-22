@@ -148,6 +148,14 @@ defmodule CalliopeParserTest do
     assert parse(tokens) == expected
   end
 
+  test :dashed_attribute_names do
+    tokens = [[1, "%li", "(ng-class=\"followees_tab\")"]]
+    expected = %{attributes: "ng-class=\"followees_tab\"", line_number: 1, tag: "li"}
+    [result] = parse(tokens)
+
+    assert Enum.into(result, %{}) == expected
+  end
+
   defp parsed_tokens(n), do: Enum.sort line(@parsed_tokens, n)
 
   defp parsed_line_tokens(tokens), do: Enum.sort parse_line(tokens)
