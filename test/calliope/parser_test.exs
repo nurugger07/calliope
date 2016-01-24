@@ -156,6 +156,27 @@ defmodule CalliopeParserTest do
     assert Enum.into(result, %{}) == expected
   end
 
+  test :hash_rocket_attributes do
+    tokens = [[1, "%p", ".alert", ".alert-info", "{:role => \"alert\"}", "= get_flash(@conn, :info)"]]
+    expected = %{attributes: "role='alert'", script: " get_flash(@conn, :info)", tag: "p", line_number: 1, classes: ["alert", "alert-info"]}
+    [result] = parse(tokens)
+
+    assert Enum.into(result, %{}) == expected
+  end
+
+  test :hash_rocket_script_attribute_exception do
+    # %script{:src => static_path(@conn, "/js/app.js")}
+    tokens = [[1, "%script", "{:src => static_path(@conn, \"/js/app.js\")}"]]
+    assert_raise CalliopeException, ~r/Invalid attribute/, fn -> 
+      parse(tokens)
+    end
+  end 
+
+  test :hash_script_exception do
+    assert_raise CalliopeException, ~r/Invalid attribute/, fn -> 
+      parse([[1, ".cls", "#id", "{attr: myfunc(1,2), attr2: \"test\"}", "= one"]])
+    end
+  end
   defp parsed_tokens(n), do: Enum.sort line(@parsed_tokens, n)
 
   defp parsed_line_tokens(tokens), do: Enum.sort parse_line(tokens)

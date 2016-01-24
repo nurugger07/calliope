@@ -68,9 +68,25 @@ defmodule Calliope.Parser do
       String.replace(~r/[:=]\s?(?!.*["'])(@?\w+)\s?/, "='#\{\\1}'") |>
       String.replace(~r/[})]$/, "") |>
       String.replace(~r/"(.+?)"\s=>\s(@?\w+)\s?/, "\\1='#\{\\2}'") |>
+      String.replace(~r/:(.+?)\s=>\s['"](.*)['"]\s?/, "\\1='\\2'") |>
       filter_commas |>
       String.strip
   end
+
+  @empty_param ~S/^\s*?[-\w]+?\s*?$/
+  @empty_params ~s/(#{@empty_param})+?/
+  @param1 ~S/[-\w]+?\s*?=\s*?['"].*?['"]\s*?/
+  @params ~s/(#{@param1})+?/
+  @validate  ~s/^(#{@params})|(#{@empty_params})$/
+
+  def validate_attributes(attributes) do
+    if Regex.match?(~r/#{@validate}/, attributes) || attributes == "" do
+      {:ok, attributes}
+    else 
+      {:error, attributes}
+    end
+  end
+
   def filter_commas(string) do
     state = String.to_char_list(string)
     |> Enum.reduce(%{last: 0, buffer: [], ignore: false}, fn(ch, state) ->
@@ -115,7 +131,12 @@ defmodule Calliope.Parser do
   defp merge_attributes(list, value) do
     classes = extract(:class, value)
     id = extract(:id, value)
-    attributes = build_attributes(value)
+    attributes = case build_attributes(value) |> validate_attributes do
+      {:ok, attrs}    -> 
+        attrs
+      {:error, attrs} -> 
+        raise_error :invalid_attribute, list[:line_number], attrs
+    end
 
     [attributes: attributes] ++ merge_into(:classes, merge_into(:id, list, id), classes)
   end
@@ -157,5 +178,5 @@ defmodule Calliope.Parser do
     Keyword.get(child, :indent, 0) > Keyword.get(parent, :indent, 0) + 1
   end
 
-  defp raise_error(error, line), do: raise(CalliopeException, error: error, line: line)
+  defp raise_error(error, line, data \\ nil), do: raise(CalliopeException, error: error, line: line, data: data)
 end

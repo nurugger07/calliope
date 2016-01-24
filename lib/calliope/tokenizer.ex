@@ -6,11 +6,13 @@ defmodule Calliope.Tokenizer do
   @value        ~S/(?:(?:'.*?')|(?:".*?"))/
   @hash_param   ~s/\\s*#{@keyword}:\\s*#{@value}\\s*/
   @hash_params  ~s/({#{@hash_param}(?:,#{@hash_param})*?})/
+  @h_r_param    ~s/\\s*:[-\\w]+?\\s+?=\\>\\s+?#{@value}\\s*/
+  @h_r_params   ~s/({#{@h_r_param}(?:,#{@h_r_param})*?})/
   @html_param   ~s/\\s*#{@keyword}\\s*=\\s*#{@value}\\s*/
   @html_params  ~s/(\\(#{@html_param}(?:\\s#{@html_param})*?\\))/
   @rest         ~S/(.+)/
 
-  @regex        ~r/(?:#{@indent}|#{@tag_class_id}|#{@hash_params}|#{@html_params}|#{@rest})/
+  @regex        ~r/(?:#{@indent}|#{@tag_class_id}|#{@hash_params}|#{@h_r_params}|#{@html_params}|#{@rest})/
 
   def tokenize(haml) when is_binary(haml) do
     Regex.split(~r/\n/, haml, trim: true) |> tokenize |> tokenize_identation |> index
