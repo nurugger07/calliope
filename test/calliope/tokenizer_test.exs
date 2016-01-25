@@ -128,4 +128,10 @@ defmodule CalliopeTokenizerTest do
     assert [[1, "%h1", " foo"]] == tokenize("%h1 foo")
   end
 
+  test :hash_rocket do
+    result = tokenize ~S[%p.alert.alert-info{:style => "one"}= get_flash(@conn, :info)]
+    expected = [[1, "%p", ".alert", ".alert-info", "{:style => \"one\"}", "= get_flash(@conn, :info)"]]
+    assert expected == result
+  end
+
 end

@@ -118,6 +118,7 @@ defmodule CalliopeParserTest do
     assert "href='http://google.com'" == build_attributes("href: 'http://google.com' }")
     assert "src='#\{url}'" == build_attributes("src: url }")
     assert "some-long-value='#\{@value}'" == build_attributes("\"some-long-value\" => @value }")
+    assert "href=\"#\{fun(one, two)}\" style='abc: 1'" == build_attributes("href: \"\#{fun(one, two)}\", style: 'abc: 1'}")
   end
 
   test :haml_exceptions do
@@ -139,6 +140,43 @@ defmodule CalliopeParserTest do
     end
   end
 
+  test :function_in_attributes do
+    tokens = [[1, "%a", "{href: '\#{page_path(conn, 1)}'}", " Link"]]
+    expected = [
+      [content: "Link", attributes: "href='\#{page_path(conn, 1)}'", tag: "a", line_number: 1]
+    ]
+    assert parse(tokens) == expected
+  end
+
+  test :dashed_attribute_names do
+    tokens = [[1, "%li", "(ng-class=\"followees_tab\")"]]
+    expected = %{attributes: "ng-class=\"followees_tab\"", line_number: 1, tag: "li"}
+    [result] = parse(tokens)
+
+    assert Enum.into(result, %{}) == expected
+  end
+
+  test :hash_rocket_attributes do
+    tokens = [[1, "%p", ".alert", ".alert-info", "{:role => \"alert\"}", "= get_flash(@conn, :info)"]]
+    expected = %{attributes: "role='alert'", script: " get_flash(@conn, :info)", tag: "p", line_number: 1, classes: ["alert", "alert-info"]}
+    [result] = parse(tokens)
+
+    assert Enum.into(result, %{}) == expected
+  end
+
+  test :hash_rocket_script_attribute_exception do
+    # %script{:src => static_path(@conn, "/js/app.js")}
+    tokens = [[1, "%script", "{:src => static_path(@conn, \"/js/app.js\")}"]]
+    assert_raise CalliopeException, ~r/Invalid attribute/, fn -> 
+      parse(tokens)
+    end
+  end 
+
+  test :hash_script_exception do
+    assert_raise CalliopeException, ~r/Invalid attribute/, fn -> 
+      parse([[1, ".cls", "#id", "{attr: myfunc(1,2), attr2: \"test\"}", "= one"]])
+    end
+  end
   defp parsed_tokens(n), do: Enum.sort line(@parsed_tokens, n)
 
   defp parsed_line_tokens(tokens), do: Enum.sort parse_line(tokens)
