@@ -87,21 +87,20 @@ defmodule Calliope.Parser do
     end
   end
 
+  @wraps [?', ?"]
+
   def filter_commas(string) do
     state = String.to_char_list(string)
-    |> Enum.reduce(%{last: 0, buffer: [], ignore: false}, fn(ch, state) ->
-      {char, ignore} = case [state[:last], ch] do
-        '#\{' ->
-          {ch, true}
-        [_,?}]  ->
-          {ch, false}
-        _ when ch == ?, ->
-          if state[:ignore], do: {ch, true}, else: {0, false}
-        _ ->
-          {ch, state[:ignore]}
+    |> Enum.reduce(%{buffer: [], closing: false}, fn(ch, state) ->
+      {char, closing} = case {ch, state[:closing]} do
+        {ch, false} when ch in @wraps -> {ch, ch}
+        {ch, closing} when ch == closing -> {ch, false}
+        {?,, false} -> {0, false}
+        {?,,closing} -> {?,, closing}
+        {ch, closing} -> {ch, closing}
       end
       buffer = unless char == 0, do: [char | state[:buffer]], else: state[:buffer]
-      %{last: ch, ignore: ignore, buffer: buffer}
+      %{buffer: buffer, closing: closing}
     end)
     Enum.reverse(state[:buffer])
     |> List.to_string
