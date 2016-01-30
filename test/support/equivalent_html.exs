@@ -1,6 +1,8 @@
 defmodule Support.EquivalentHtml do
-  def equivalent_html?(html1, html2) do
-    stripped(html1) == stripped(html2)
+  import ExUnit.Assertions, only: [assert: 1, assert: 2]
+
+  def assert_equivalent_html(html1, html2) do
+    assert(stripped(html1) == stripped(html2))
   end
 
   defp stripped(html) do

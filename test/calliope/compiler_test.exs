@@ -102,7 +102,7 @@ defmodule CalliopeCompilerTest do
       ]
     ]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
   test :compile_with_multiline_script do
@@ -121,7 +121,7 @@ defmodule CalliopeCompilerTest do
       ]
     ]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
   test :compile_with_cond_evaluation do
@@ -142,7 +142,7 @@ defmodule CalliopeCompilerTest do
         [indent: 2, smart_script: "(2 * 2 != 4) ->", children: [[indent: 3, tag: "p", content: "No2"]]],
         [indent: 2, smart_script: "true ->", children: [[indent: 3, tag: "p", content: "Yes"]]]]]]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
   test :compile_with_if_evaluation do
@@ -156,7 +156,7 @@ defmodule CalliopeCompilerTest do
       [indent: 1, smart_script: "if test > 5 do", children: [[indent: 2, tag: "p", content: "No1"]]],
     ]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
   test :compile_with_if_else_evaluation do
@@ -173,7 +173,7 @@ defmodule CalliopeCompilerTest do
       [indent: 1, smart_script: "else", children: [[indent: 2, tag: "p", content: "No2"]]]
     ]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
   test :compile_with_unless_evaluation do
@@ -187,7 +187,7 @@ defmodule CalliopeCompilerTest do
       [indent: 1, smart_script: "unless test > 5 do", children: [[indent: 2, tag: "p", content: "No1"]]],
     ]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
   test :compile_with_unless_else_evaluation do
@@ -204,7 +204,7 @@ defmodule CalliopeCompilerTest do
       [indent: 1, smart_script: "else", children: [[indent: 2, tag: "p", content: "No2"]]]
     ]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
   test :compile_local_variables do
@@ -218,7 +218,7 @@ defmodule CalliopeCompilerTest do
       [script: " test", line_number: 2]
     ]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
   test :preserves_indentation_and_new_lines do
@@ -255,7 +255,7 @@ defmodule CalliopeCompilerTest do
         children: [[line_number: 2, indent: 1, classes: ["test"]]]]
     ]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
   test :render_anonymous_function_parens do
@@ -270,7 +270,7 @@ defmodule CalliopeCompilerTest do
         children: [[line_number: 2, indent: 1, classes: ["test"]]]]
     ]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
   test :render_anonymous_functions_parens_2 do
@@ -285,6 +285,6 @@ defmodule CalliopeCompilerTest do
         children: [[line_number: 2, indent: 1, classes: ["test"]]]]
     ]
 
-    assert equivalent_html?(expected, compile(parsed_tokens))
+    assert_equivalent_html(expected, compile(parsed_tokens))
   end
 end

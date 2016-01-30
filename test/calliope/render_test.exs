@@ -47,7 +47,7 @@ defmodule CalliopeRenderTest do
           #main.content
             Welcome to Calliope
       """
-    assert equivalent_html?(expected, render(haml))
+    assert_equivalent_html(expected, render(haml))
   end
 
   test :eval do
@@ -77,7 +77,7 @@ defmodule CalliopeRenderTest do
       %p= var
       """
 
-    assert equivalent_html?(expected, render(haml))
+    assert_equivalent_html(expected, render(haml))
   end
 
   test :case_evaluation do
@@ -102,7 +102,7 @@ defmodule CalliopeRenderTest do
             = other
       """
 
-    assert equivalent_html?(expected, render(haml))
+    assert_equivalent_html(expected, render(haml))
   end
 
   test :else_result do
@@ -113,6 +113,6 @@ defmodule CalliopeRenderTest do
         %p false
       """
 
-    assert equivalent_html?("<p>false</p>", EEx.eval_string(render(haml), []))
+    assert_equivalent_html("<p>false</p>", EEx.eval_string(render(haml), []))
   end
 end
