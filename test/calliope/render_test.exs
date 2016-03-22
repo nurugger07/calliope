@@ -36,6 +36,22 @@ defmodule CalliopeRenderTest do
 }
 
   @haml_with_args "%a{href: '#\{url}'}= title"
+  @haml_with_complex_args "%a{href: 'http://#{"www.google.com"}'}= title"
+  @haml_with_complex_args_workaround ~S(%a{href: 'http://#{"www.google.com"}'}= title)
+  @haml_with_function_call """
+  %link{rel: 'stylesheet' href: '#\{static_path(@conn, "/css/app.css" )}' }
+  """
+
+  test :precompile do
+    assert ~s{<a href='http://<%= "www.google.com" %>'><%= title %></a>\n} ==
+      Calliope.Render.precompile @haml_with_complex_args_workaround
+    # Simply removes the interpolation which it should not
+    assert ~s{<a href='http://<%= "www.google.com" %>'><%= title %></a>\n} ==
+      Calliope.Render.precompile @haml_with_complex_args
+    # Fails missing the comma separating the first and second parameter
+    assert ~s{<link rel='stylesheet' href='<%= static_path(@conn, "/css/app.css") %>'>\n} ==
+      Calliope.Render.precompile @haml_with_function_call
+  end
 
   test :render do
     assert String.replace(@html, "\n", "") == String.replace(render(@haml), "\n", "")
@@ -75,10 +91,10 @@ defmodule CalliopeRenderTest do
 
   test :case_evaluation do
     haml = ~s{- case @var do
-  -  nil -> 
+  -  nil ->
     %p Found nil value
   - other ->
-    %p Found other: 
+    %p Found other:
       = other
 }
 
@@ -97,10 +113,10 @@ defmodule CalliopeRenderTest do
     haml = """
 - if false do
   %p true
-- else 
+- else
   %p false
 """
     actual = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, EEx.eval_string(render(haml), []), "")
-    assert actual == "<p>false</p>" 
+    assert actual == "<p>false</p>"
   end
 end
