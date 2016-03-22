@@ -11,6 +11,7 @@ defmodule Calliope.Mixfile do
       package: [
         files: ["lib", "mix.exs", "README*", "LICENSE*"],
         contributors: ["Johnny Winn", "Stephen Pallen"],
+        maintainers: ["Johnny Winn", "Stephen Pallen"],
         licenses: ["Apache 2.0"],
         links: %{ "Github" => "https://github.com/nurugger07/calliope" }
       ],
