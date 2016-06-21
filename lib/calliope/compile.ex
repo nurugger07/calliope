@@ -28,12 +28,12 @@ defmodule Calliope.Compiler do
   end
   defp build_html(node, [next_node|_], si) do
     cond do
-      node[:smart_script] -> 
+      node[:smart_script] ->
         cond do
           next_node[:smart_script] ->
             # send next code to look ahead for things like else
             evaluate_smart_script(node[:smart_script], node[:children], next_node[:smart_script], si)
-          true ->  
+          true ->
             evaluate_smart_script(node[:smart_script], node[:children], "", si)
         end
       true -> evaluate(node, si)
@@ -112,7 +112,7 @@ defmodule Calliope.Compiler do
 
   def precompile_content(nil), do: nil
   def precompile_content(content) do
-    Regex.scan(~r/\#{(.+)}/r, content) |>
+    Regex.scan(~r/\#{(.+)}/U, content) |>
       map_content_to_args(content)
   end
 
@@ -170,7 +170,7 @@ defmodule Calliope.Compiler do
     cond do
       Regex.match? ~r/(fn )|(fn\()[a-zA-Z0-9,\) ]+->/, script ->
         %{cmd: script, wraps_end: "<% end#{ch} %>", end_tag: "%>", open_tag: "<%="}
-      Regex.match? ~r/ do:?/, script -> 
+      Regex.match? ~r/ do:?/, script ->
         %{cmd: script, wraps_end: "<% end#{ch} %>", end_tag: "%>", open_tag: "<%="}
       true ->
         %{cmd: script, wraps_end: "", end_tag: "%>", open_tag: "<%"}
