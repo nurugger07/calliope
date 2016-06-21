@@ -62,8 +62,8 @@ defmodule Calliope.Parser do
 
   def build_attributes(value) do
     String.slice(value, 0, String.length(value)-1) |>
-      String.replace(~r/(?<![-_])class[=:]\s?['"](.*)['"]/r, "") |>
-      String.replace(~r/(?<![-_])id[=:]\s?['"](.*)['"]/r, "") |>
+      String.replace(~r/(?<![-_])class[=:]\s?['"](.*)['"]/U, "") |>
+      String.replace(~r/(?<![-_])id[=:]\s?['"](.*)['"]/U, "") |>
       String.replace(~r/:\s+([\'"])/, "=\\1") |>
       String.replace(~r/[:=]\s?(?!.*["'])(@?\w+)\s?/, "='#\{\\1}'") |>
       String.replace(~r/[})]$/, "") |>
@@ -82,7 +82,7 @@ defmodule Calliope.Parser do
   def validate_attributes(attributes) do
     if Regex.match?(~r/#{@validate}/, attributes) || attributes == "" do
       {:ok, attributes}
-    else 
+    else
       {:error, attributes}
     end
   end
@@ -131,9 +131,9 @@ defmodule Calliope.Parser do
     classes = extract(:class, value)
     id = extract(:id, value)
     attributes = case build_attributes(value) |> validate_attributes do
-      {:ok, attrs}    -> 
+      {:ok, attrs}    ->
         attrs
-      {:error, attrs} -> 
+      {:error, attrs} ->
         raise_error :invalid_attribute, list[:line_number], attrs
     end
 
@@ -142,7 +142,7 @@ defmodule Calliope.Parser do
 
   defp extract(_, nil), do: []
   defp extract(key, str) do
-    case Regex.run(~r/(?<![-_])#{key}[=:]\s?['"](.*)['"]/r, str) do
+    case Regex.run(~r/(?<![-_])#{key}[=:]\s?['"](.*)['"]/U, str) do
       [ _, match | _ ] -> String.split match
       _ -> []
     end
