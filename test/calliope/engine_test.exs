@@ -23,6 +23,10 @@ defmodule CalliopeEngineTest do
     assert "<h1>Calliope</h1>\nIndex Page\n" == content_for :index, [title: "Calliope"]
   end
 
+  test :render_pages_with_dangerous_values do
+    assert "<h1>&lt;script&rt;Calliope&lt;/script&rt;</h1>\nIndex Page\n" == content_for :index, [title: "<script>Calliope</script>", _safe: true]
+  end
+
   test :content_for_multiple_views do
     assert "This is the edit page\n" == content_for :edit, []
     assert "This is the show page\n" == content_for :show, []
