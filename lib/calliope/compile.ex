@@ -141,9 +141,9 @@ defmodule Calliope.Compiler do
 
   def close_script(nil), do: ""
   def close_script(script) do
-    case Regex.match?(~r/do\s*\z/, script) do
-      true -> "<% end %>"
-      _    -> ""
+    cond do
+      Regex.match?(~r/do\s*\z/, script) -> "<% end %>"
+      true -> ""
     end
   end
 
