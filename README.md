@@ -40,7 +40,7 @@ def deps do
 end
 ```
 
-If you aren't using hex, add the a reference to the github repo.
+If you aren't using hex, add the reference to the github repo.
 
 ``` elixir
 def deps do
@@ -215,7 +215,7 @@ Will render
 
 ## Precompile Templates
 
-Calliope provides an Engine to precompile your haml templates in to functions. This parses the template at compile time and creates a function that takes the name and args needed to render the page. These functions are scoped to the module that uses the engine.
+Calliope provides an Engine to precompile your haml templates into functions. This parses the template at compile time and creates a function that takes the name and args needed to render the page. These functions are scoped to the module that uses the engine.
 
 Adding this functionality is easy.
 
