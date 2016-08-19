@@ -34,10 +34,14 @@ defmodule Calliope.Tokenizer do
     end)
     |> List.flatten
     |> Enum.map(fn(t) ->
-      s = String.split(t, ~r/(}|\))\s+/)
-      case s do
-        [tag, content] -> [tag <> "}", " " <> content]
-        _ -> s
+      case String.starts_with?(t, "-") do
+        false ->
+          s = String.split(t, ~r/(}|\))\s+/i)
+          case s do
+            [tag, content] -> [tag <> "}", " " <> content]
+            _ -> s
+          end
+        true -> t
       end
     end)
     |> List.flatten
