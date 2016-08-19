@@ -5,6 +5,9 @@ defmodule CalliopeRenderTest do
   import Support.EquivalentHtml
 
   def haml_with_args, do: "%a{href: '#\{url}'}= title"
+  def haml_with_unin_args, do: "%a{href: url}= title"
+  def haml_with_unin_args_content_only, do: "%a{href: url} title"
+  def haml_with_unin_parens, do: "%a(href=url)= title"
 
   test :render do
     assert "<h1>This is <%= title %></h1>\n" == render "%h1 This is \#{title}"
@@ -50,6 +53,17 @@ defmodule CalliopeRenderTest do
     assert_equivalent_html(expected, render(haml))
   end
 
+  test :render_indented_plain_args do
+    expected = """
+      <a href='http://foobar.com'>Text</a>
+      """
+
+    haml = """
+      %a{href: url} Text
+      """
+    assert_equivalent_html(expected, render(haml, [url: 'http://foobar.com']))
+  end
+
   test :eval do
     result = "<a href='http://example.com'>Example</a>\n"
     assert result == render "%a{href: 'http://example.com'} Example" |> eval([])
@@ -64,6 +78,21 @@ defmodule CalliopeRenderTest do
   test :render_with_args do
     assert "<a href='http://google.com'>Google</a>\n" ==
       render haml_with_args, [ url: "http://google.com", title: "Google" ]
+  end
+
+  test :render_with_unin_args do
+    assert "<a href='http://google.com'>Google</a>\n" ==
+      render haml_with_unin_args, [ url: "http://google.com", title: "Google" ]
+  end
+
+  test :render_with_unin_args_content_only do
+    assert "<a href='http://google.com'>title</a>\n" ==
+      render haml_with_unin_args_content_only, [ url: "http://google.com" ]
+  end
+
+  test :render_with_unin_parens do
+    assert "<a href='http://google.com'>Google</a>\n" ==
+      render haml_with_unin_parens, [ url: "http://google.com", title: "Google" ]
   end
 
   test :local_variable do
