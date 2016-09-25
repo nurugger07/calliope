@@ -56,6 +56,9 @@ defmodule Calliope.Parser do
   def handle_filter(line, "javascript") do
     [ tag: "script", attributes: "type=\"text/javascript\"" ] ++ line
   end
+  def handle_filter(line, "css") do
+    [ tag: "style", attributes: "type=\"text/css\"" ] ++ line
+  end
   def handle_filter(line, _unknown_filter) do
     raise_error(:unknown_filter, line[:line_number])
   end
