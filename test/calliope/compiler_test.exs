@@ -221,6 +221,17 @@ defmodule CalliopeCompilerTest do
     assert_equivalent_html(expected, compile(parsed_tokens))
   end
 
+  test :compile_script_with_block do
+    expected = "<%= func do %>  block<% end %>"
+
+    parsed_tokens = [
+      [script: "func do", line_number: 1,
+       children: [[content: "block", indent: 1, line_number: 2]]]
+    ]
+
+    assert_equivalent_html(expected, compile(parsed_tokens))
+  end
+
   test :preserves_indentation_and_new_lines do
     expected = "  <div>\n    <b>Test</b>\n  </div>\n"
     parsed_tokens = [

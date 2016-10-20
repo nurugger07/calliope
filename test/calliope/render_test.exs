@@ -144,4 +144,17 @@ defmodule CalliopeRenderTest do
 
     assert_equivalent_html("<p>false</p>", EEx.eval_string(render(haml), []))
   end
+
+  test :block_evaluation do
+    expected = """
+    <%= func do %>  text<% end %>
+    """
+
+    haml = """
+    = func do
+      text
+    """
+
+    assert_equivalent_html(expected, render(haml))
+  end
 end

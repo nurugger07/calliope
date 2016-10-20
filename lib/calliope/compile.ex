@@ -48,6 +48,7 @@ defmodule Calliope.Compiler do
         precompile_content("#{line[:content]}") <>
         evaluate_script(line[:script]) <>
         compile(line[:children], si) <>
+      close_script(line[:script]) <>
       close(tag(line), leader_close(line, si)) <>
     comment(line[:comment], :close) <> @nl
   end
@@ -137,6 +138,14 @@ defmodule Calliope.Compiler do
   def close("!!!" <> _, _leader), do: ""
   def close(tag_value, _leader) when tag_value in @self_closing, do: ""
   def close(tag_value, leader), do: leader <> "</#{tag_value}>"
+
+  def close_script(nil), do: ""
+  def close_script(script) do
+    cond do
+      Regex.match?(~r/do\s*\z/, script) -> "<% end %>"
+      true -> ""
+    end
+  end
 
   def compile_attributes(list) do
     Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1])) |>
