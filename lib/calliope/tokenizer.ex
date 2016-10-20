@@ -25,6 +25,26 @@ defmodule Calliope.Tokenizer do
 
   def tokenize_line(line) do
     Regex.scan(@regex, line, trim: true) |> reduce
+    |> Enum.map(fn(t) ->
+      s = String.split(t, ~r/(}|\))\s*=/)
+      case s do
+        [tag, content] -> [tag <> "}", "=" <> content]
+        _ -> s
+      end
+    end)
+    |> List.flatten
+    |> Enum.map(fn(t) ->
+      case String.starts_with?(t, "-") do
+        false ->
+          s = String.split(t, ~r/(}|\))\s+/i)
+          case s do
+            [tag, content] -> [tag <> "}", " " <> content]
+            _ -> s
+          end
+        true -> t
+      end
+    end)
+    |> List.flatten
   end
 
   def reduce([]), do: []
