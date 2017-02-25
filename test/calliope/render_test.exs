@@ -72,27 +72,27 @@ defmodule CalliopeRenderTest do
 
   test :render_with_params do
     assert "<a href='<%= url %>'><%= title %></a>\n" ==
-      render haml_with_args
+      render haml_with_args()
   end
 
   test :render_with_args do
     assert "<a href='http://google.com'>Google</a>\n" ==
-      render haml_with_args, [ url: "http://google.com", title: "Google" ]
+      render haml_with_args(), [ url: "http://google.com", title: "Google" ]
   end
 
   test :render_with_unin_args do
     assert "<a href='http://google.com'>Google</a>\n" ==
-      render haml_with_unin_args, [ url: "http://google.com", title: "Google" ]
+      render haml_with_unin_args(), [ url: "http://google.com", title: "Google" ]
   end
 
   test :render_with_unin_args_content_only do
     assert "<a href='http://google.com'>title</a>\n" ==
-      render haml_with_unin_args_content_only, [ url: "http://google.com" ]
+      render haml_with_unin_args_content_only(), [ url: "http://google.com" ]
   end
 
   test :render_with_unin_parens do
     assert "<a href='http://google.com'>Google</a>\n" ==
-      render haml_with_unin_parens, [ url: "http://google.com", title: "Google" ]
+      render haml_with_unin_parens(), [ url: "http://google.com", title: "Google" ]
   end
 
   test :local_variable do
