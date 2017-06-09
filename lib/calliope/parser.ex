@@ -68,12 +68,13 @@ defmodule Calliope.Parser do
       String.replace(~r/(?<![-_])class[=:]\s?['"](.*)['"]/U, "") |>
       String.replace(~r/(?<![-_])id[=:]\s?['"](.*)['"]/U, "") |>
       String.replace(~r/:\s+([\'"])/, "=\\1") |>
-      String.replace(~r/[:=]\s?(?!.*["'])(@?\w+)\s?/, "='#\{\\1}'") |>
+      String.replace(~r/[:=]\s?(?!.*["'])(@?[\w\.]+)\s?/, "='#\{\\1}'") |>
       String.replace(~r/[})]$/, "") |>
       String.replace(~r/"(.+?)"\s=>\s(@?\w+)\s?/, "\\1='#\{\\2}'") |>
       String.replace(~r/:(.+?)\s=>\s['"](.*)['"]\s?/, "\\1='\\2'") |>
       filter_commas |>
-      String.strip
+      String.strip |>
+      IO.inspect
   end
 
   @empty_param ~S/^\s*?[-\w]+?\s*?$/

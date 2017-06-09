@@ -144,4 +144,9 @@ Outside the div
   test :preserves_newlines_with_comments do
     assert render(@haml) == @expected
   end
+
+  @haml ".foo{a: 1, b: mystruct.key}"
+  test :proper_attribute_fixing do
+    assert Calliope.Render.precompile(@haml) == "<div class=\"foo\" a='<%= 1 %>' b='<%= mystruct.key %>'></div>\n"
+  end
 end
