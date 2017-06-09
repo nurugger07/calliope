@@ -147,6 +147,6 @@ Outside the div
 
   @haml ".foo{a: 1, b: mystruct.key}"
   test :proper_attribute_fixing do
-    assert Calliope.Render.precompile(@haml) == "<div class=\"foo\" a='<%= 1 %>' b='<%= mystruct.key %>' ></div>\n"
+    assert Calliope.Render.precompile(@haml) == "<div class=\"foo\" a='<%= 1 %>' b='<%= mystruct.key %>'></div>\n"
   end
 end
