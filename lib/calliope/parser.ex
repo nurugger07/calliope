@@ -30,7 +30,7 @@ defmodule Calliope.Parser do
     [sym, val] = [head(h), tail(h)]
     acc = case sym do
       @doctype  -> [ doctype: h ] ++ acc
-      @tag      -> [ tag: String.strip(val) ] ++ acc
+      @tag      -> [ tag: String.trim(val) ] ++ acc
       @id       -> handle_id(acc, val)
       @class    -> merge_into(:classes, acc, [val])
       @tab      -> [ indent: String.length(h) ] ++ acc
@@ -38,14 +38,14 @@ defmodule Calliope.Parser do
       @parens   -> merge_attributes( acc, val)
       @comment  -> handle_comment(val) ++ acc
       @script   -> [ script: val ] ++ acc
-      @smart    -> [ smart_script: String.strip(val) ] ++ acc
+      @smart    -> [ smart_script: String.trim(val) ] ++ acc
       @filter   -> handle_filter(acc, val)
-      _         -> [ content: String.strip(h) ] ++ acc
+      _         -> [ content: String.trim(h) ] ++ acc
     end
     parse_line(t, acc)
   end
 
-  def handle_comment(val), do: [ comment: String.rstrip "!--#{val}" ]
+  def handle_comment(val), do: [ comment: String.trim_trailing "!--#{val}" ]
   def handle_id(line, id) do
     cond do
       line[:id] -> raise_error :multiple_ids_assigned, line[:line_number]
@@ -73,7 +73,7 @@ defmodule Calliope.Parser do
       String.replace(~r/"(.+?)"\s=>\s(@?\w+)\s?/, "\\1='#\{\\2}'") |>
       String.replace(~r/:(.+?)\s=>\s['"](.*)['"]\s?/, "\\1='\\2'") |>
       filter_commas |>
-      String.strip
+      String.trim
   end
 
   @empty_param ~S/^\s*?[-\w]+?\s*?$/
@@ -93,7 +93,7 @@ defmodule Calliope.Parser do
   @wraps [?', ?"]
 
   def filter_commas(string) do
-    state = String.to_char_list(string)
+    state = String.to_charlist(string)
     |> Enum.reduce(%{buffer: [], closing: false}, fn(ch, state) ->
       {char, closing} = case {ch, state[:closing]} do
         {ch, false} when ch in @wraps -> {ch, ch}
