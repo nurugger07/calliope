@@ -64,7 +64,7 @@ defmodule Calliope.Compiler do
   defp leader(line, si) do
     case line[:indent] do
       nil   -> ""
-      value -> String.rjust("", (value - si) * @indent_size)
+      value -> String.pad_leading("", (value - si) * @indent_size)
     end
   end
 
@@ -82,7 +82,7 @@ defmodule Calliope.Compiler do
   end
 
   def evaluate_script(nil), do: ""
-  def evaluate_script(script) when is_binary(script), do: "<%= #{String.lstrip(script)} %>"
+  def evaluate_script(script) when is_binary(script), do: "<%= #{String.trim_leading(script)} %>"
 
   defp smart_script_to_string("if" <> script, children, "else", si) do
     %{cmd: cmd, end_tag: end_tag} = handle_script("if" <> script)
@@ -148,9 +148,10 @@ defmodule Calliope.Compiler do
   end
 
   def compile_attributes(list) do
-    Enum.map_join(@attributes, &reject_or_compile_key(&1, list[&1])) |>
-      precompile_content |>
-      String.rstrip
+    @attributes
+    |> Enum.map_join(&reject_or_compile_key(&1, list[&1]))
+    |> precompile_content
+    |> String.trim_trailing()
   end
 
   def reject_or_compile_key( _, nil), do: nil
