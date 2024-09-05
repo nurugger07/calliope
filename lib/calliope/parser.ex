@@ -3,7 +3,6 @@ defmodule Calliope.Parser do
   @tag      "%"
   @id       "#"
   @class    "."
-  @content  " "
   @tab      "\t"
   @doctype  "!"
   @attrs    "{"
@@ -14,8 +13,11 @@ defmodule Calliope.Parser do
   @filter   ":"
 
   def parse([]), do: []
-  def parse(l) do
-    parse_lines(l) |> validations |> build_tree
+  def parse(lines) do
+    lines
+    |> parse_lines()
+    |> validations()
+    |> build_tree()
   end
 
   def parse_lines([]), do: []
@@ -30,7 +32,7 @@ defmodule Calliope.Parser do
     [sym, val] = [head(h), tail(h)]
     acc = case sym do
       @doctype  -> [ doctype: h ] ++ acc
-      @tag      -> [ tag: String.strip(val) ] ++ acc
+      @tag      -> [ tag: String.trim(val) ] ++ acc
       @id       -> handle_id(acc, val)
       @class    -> merge_into(:classes, acc, [val])
       @tab      -> [ indent: String.length(h) ] ++ acc
@@ -38,14 +40,14 @@ defmodule Calliope.Parser do
       @parens   -> merge_attributes( acc, val)
       @comment  -> handle_comment(val) ++ acc
       @script   -> [ script: val ] ++ acc
-      @smart    -> [ smart_script: String.strip(val) ] ++ acc
+      @smart    -> [ smart_script: String.trim(val) ] ++ acc
       @filter   -> handle_filter(acc, val)
-      _         -> [ content: String.strip(h) ] ++ acc
+      _         -> [ content: String.trim(h) ] ++ acc
     end
     parse_line(t, acc)
   end
 
-  def handle_comment(val), do: [ comment: String.rstrip "!--#{val}" ]
+  def handle_comment(val), do: [ comment: String.trim_trailing("!--#{val}") ]
   def handle_id(line, id) do
     cond do
       line[:id] -> raise_error :multiple_ids_assigned, line[:line_number]
@@ -64,16 +66,17 @@ defmodule Calliope.Parser do
   end
 
   def build_attributes(value) do
-    String.slice(value, 0, String.length(value)-1) |>
-      String.replace(~r/(?<![-_])class[=:]\s?['"](.*)['"]/U, "") |>
-      String.replace(~r/(?<![-_])id[=:]\s?['"](.*)['"]/U, "") |>
-      String.replace(~r/:\s+([\'"])/, "=\\1") |>
-      String.replace(~r/[:=]\s?(?!.*["'])(@?\w+)\s?/, "='#\{\\1}'") |>
-      String.replace(~r/[})]$/, "") |>
-      String.replace(~r/"(.+?)"\s=>\s(@?\w+)\s?/, "\\1='#\{\\2}'") |>
-      String.replace(~r/:(.+?)\s=>\s['"](.*)['"]\s?/, "\\1='\\2'") |>
-      filter_commas |>
-      String.strip
+    value
+    |> String.slice(0, String.length(value)-1)
+    |> String.replace(~r/(?<![-_])class[=:]\s?['"](.*)['"]/U, "")
+    |> String.replace(~r/(?<![-_])id[=:]\s?['"](.*)['"]/U, "")
+    |> String.replace(~r/:\s+([\'"])/, "=\\1")
+    |> String.replace(~r/[:=]\s?(?!.*["'])(@?\w+)\s?/, "='#\{\\1}'")
+    |> String.replace(~r/[})]$/, "")
+    |> String.replace(~r/"(.+?)"\s=>\s(@?\w+)\s?/, "\\1='#\{\\2}'")
+    |> String.replace(~r/:(.+?)\s=>\s['"](.*)['"]\s?/, "\\1='\\2'")
+    |> filter_commas()
+    |> String.trim()
   end
 
   @empty_param ~S/^\s*?[-\w]+?\s*?$/
@@ -93,20 +96,24 @@ defmodule Calliope.Parser do
   @wraps [?', ?"]
 
   def filter_commas(string) do
-    state = String.to_char_list(string)
-    |> Enum.reduce(%{buffer: [], closing: false}, fn(ch, state) ->
+    state =
+      string
+      |> String.to_charlist()
+      |> Enum.reduce(%{buffer: [], closing: false}, fn(ch, state) ->
       {char, closing} = case {ch, state[:closing]} do
-        {ch, false} when ch in @wraps -> {ch, ch}
-        {ch, closing} when ch == closing -> {ch, false}
-        {?,, false} -> {0, false}
-        {?,,closing} -> {?,, closing}
-        {ch, closing} -> {ch, closing}
-      end
+                          {ch, false} when ch in @wraps -> {ch, ch}
+                          {ch, closing} when ch == closing -> {ch, false}
+                          {?,, false} -> {0, false}
+                          {?,,closing} -> {?,, closing}
+                          {ch, closing} -> {ch, closing}
+                        end
       buffer = unless char == 0, do: [char | state[:buffer]], else: state[:buffer]
       %{buffer: buffer, closing: closing}
     end)
-    Enum.reverse(state[:buffer])
-    |> List.to_string
+
+      state[:buffer]
+      |> Enum.reverse()
+      |> List.to_string
   end
 
   def build_tree([]), do: []
@@ -164,7 +171,7 @@ defmodule Calliope.Parser do
   end
 
   defp head(str), do: String.first(str)
-  defp tail(str), do: String.slice(str, 1..-1)
+  defp tail(str), do: String.slice(str, 1..-1//1)
 
   defp validations([]), do: []
   defp validations([h|t]) do
