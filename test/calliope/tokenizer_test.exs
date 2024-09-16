@@ -80,8 +80,8 @@ defmodule CalliopeTokenizerTest do
     assert [[1, "%label", ".cl1", "{ for:  'test', class:  ' cl2' }", " Label"]] ==
       tokenize("%label.cl1{ for:  'test', class:  ' cl2' } Label")
 
-    assert [[1, "%label", "{ for: \"\#{@id}\", class: \"\#{@class}\" }", " Label"]] ==
-      tokenize("%label{ for: \"\#{@id}\", class: \"\#{@class}\" } Label")
+    to_parse = "%label{ for: \"\#{@id}\", class: \"\#{@class}\" } Label"
+    assert [[1, "%label", "{ for: \"\#{@id}\", class: \"\#{@class}\" }", " Label"]] == tokenize(to_parse)
   end
 
   test :tokenize_identation do

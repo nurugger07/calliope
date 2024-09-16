@@ -6,34 +6,34 @@ defmodule CalliopeIntegerationTest do
   @haml """
 - if false do
   %p true
-- else 
+- else
   %p false
 """
   test :else_result do
     actual = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, EEx.eval_string(render(@haml), []), "")
-    assert actual == "<p>false</p>" 
+    assert actual == "<p>false</p>"
   end
 
   @haml """
 - if true do
   %p true
-- else 
+- else
   %p false
 """
   test :if_result_with_else do
     actual = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, EEx.eval_string(render(@haml), []), "")
-    assert actual == "<p>true</p>" 
+    assert actual == "<p>true</p>"
   end
- 
+
   @haml """
 - if true do
   %p true
 """
   test :if_true_result do
     actual = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, EEx.eval_string(render(@haml), []), "")
-    assert actual == "<p>true</p>" 
+    assert actual == "<p>true</p>"
   end
- 
+
   @haml """
 - if false do
   %p true
@@ -49,19 +49,19 @@ defmodule CalliopeIntegerationTest do
 """
   test :uneless_false_result do
     actual = Regex.replace(~r/(^\s*)|(\s+$)|(\n)/m, EEx.eval_string(render(@haml), []), "")
-    assert actual == "<p>true</p>" 
+    assert actual == "<p>true</p>"
   end
 
   @haml ~S(- unless true do
   %p false
-- else 
+- else
   %p true
 )
   test :unless_result_with_else do
     actual = EEx.eval_string(render(@haml), [])
-    assert actual == "\n<p>true</p>\n" 
+    assert actual == "\n<p>true</p>\n"
   end
- 
+
   @haml ~S(- answer = "42"
 %p
   The answer is
@@ -83,11 +83,11 @@ defmodule CalliopeIntegerationTest do
 
   @haml ~S(
 - case 1 + 1 do
-  - 1 -> 
+  - 1 ->
     %p Got one
   - 2 ->
     %p Got two
-  - other -> 
+  - other ->
     %p= "Got other #{other}"
 )
   test :case_evaluation do
@@ -110,7 +110,6 @@ Outside the div
   test :preserves_newlines do
     assert EEx.eval_string(render(@haml), []) == @expected
   end
-
 
   @haml ~s{!!! 5
 %section.container
