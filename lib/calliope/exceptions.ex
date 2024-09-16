@@ -19,8 +19,8 @@ defmodule CalliopeException do
     %CalliopeException{message: build_message(error, line, data)}
   end
 
-  defp build_message(error, line, data) do 
-    messages()[error] 
+  defp build_message(error, line, data) do
+    messages()[error]
     |> String.replace(~r/##data##/, data)
     |> String.replace(~r/#/, "#{line}")
   end

@@ -1,4 +1,6 @@
 defmodule Calliope.Render do
+  @moduledoc false
+
   import Calliope.Tokenizer
   import Calliope.Parser
   import Calliope.Compiler

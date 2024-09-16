@@ -9,7 +9,7 @@ defmodule CalliopeCompilerTest do
   end
 
   test :compile_attributes do
-    assert " id=\"foo\" class=\"bar baz\"" ==
+    assert ~S{ id="foo" class="bar baz"} ==
       compile_attributes([id: "foo", classes: ["bar", "baz"]])
     assert " class=\"bar\"" == compile_attributes([classes: ["bar"]])
     assert " id=\"foo\"" == compile_attributes([id: "foo"])
@@ -36,9 +36,9 @@ defmodule CalliopeCompilerTest do
     assert "" == open("", nil)
 
     assert "<!DOCTYPE html>" == open("", "!!! 5")
-    assert "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" == open("", "!!!")
+    assert ~S{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">} == open("", "!!!")
 
-    assert "<div id=\"foo\" class=\"bar\">" == open(" id=\"foo\" class=\"bar\"", :div)
+    assert ~S{<div id="foo" class="bar">} == open(~S{ id="foo" class="bar"}, :div)
   end
 
   test :close do

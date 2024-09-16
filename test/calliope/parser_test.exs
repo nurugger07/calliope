@@ -20,43 +20,43 @@ defmodule CalliopeParserTest do
     ]
 
   @parsed_tokens [
-      [ doctype: "!!! 5", line_number: 1],
-      [ tag: "section", classes: ["container", "blue"] , line_number: 2],
-      [ indent: 1, tag: "h1", content: "Calliope", line_number: 3 ],
-      [ indent: 1, comment: "!--", tag: "h1", content: "An important inline comment", line_number: 4 ],
-      [ indent: 1, comment: "!--[if IE]", line_number: 5 ],
-      [ indent: 2, tag: "h2", content: "An Elixir Haml Parser", line_number: 6 ],
-      [ indent: 1, id: "main", classes: ["content"], line_number: 7 ],
-      [ indent: 2, smart_script: "for { arg } <- args do", line_number: 8 ],
-      [ indent: 3, script: " arg", line_number: 9 ],
-      [ indent: 2, content: "Welcome to \#{title}", line_number: 10 ],
-      [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'", line_number: 11 ],
-      [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'", line_number: 12 ],
-      [ indent: 1, tag: "script", attributes: "type=\"text/javascript\"", line_number: 13 ]
+      [doctype: "!!! 5", line_number: 1],
+      [tag: "section", classes: ["container", "blue"] , line_number: 2],
+      [indent: 1, tag: "h1", content: "Calliope", line_number: 3 ],
+      [indent: 1, comment: "!--", tag: "h1", content: "An important inline comment", line_number: 4 ],
+      [indent: 1, comment: "!--[if IE]", line_number: 5 ],
+      [indent: 2, tag: "h2", content: "An Elixir Haml Parser", line_number: 6 ],
+      [indent: 1, id: "main", classes: ["content"], line_number: 7 ],
+      [indent: 2, smart_script: "for { arg } <- args do", line_number: 8 ],
+      [indent: 3, script: " arg", line_number: 9 ],
+      [indent: 2, content: "Welcome to \#{title}", line_number: 10 ],
+      [tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'", line_number: 11 ],
+      [indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'", line_number: 12 ],
+      [indent: 1, tag: "script", attributes: "type=\"text/javascript\"", line_number: 13 ]
     ]
 
   @nested_tree [
-      [ doctype: "!!! 5", line_number: 1],
-      [ tag: "section", classes: ["container", "blue"], line_number: 2, children: [
-          [ indent: 1, tag: "h1", content: "Calliope", line_number: 3 ],
-          [ indent: 1, comment: "!--", tag: "h1", content: "An important inline comment", line_number: 4 ],
-          [ indent: 1, comment: "!--[if IE]", line_number: 5, children: [
-              [ indent: 2, tag: "h2",content: "An Elixir Haml Parser", line_number: 6]
+      [doctype: "!!! 5", line_number: 1],
+      [tag: "section", classes: ["container", "blue"], line_number: 2, children: [
+          [indent: 1, tag: "h1", content: "Calliope", line_number: 3 ],
+          [indent: 1, comment: "!--", tag: "h1", content: "An important inline comment", line_number: 4 ],
+          [indent: 1, comment: "!--[if IE]", line_number: 5, children: [
+              [indent: 2, tag: "h2", content: "An Elixir Haml Parser", line_number: 6]
             ]
           ],
-          [ indent: 1, id: "main", classes: ["content"], line_number: 7, children: [
-              [ indent: 2, smart_script: "for { arg } <- args do", line_number: 8, children: [
-                  [ indent: 3, script: " arg", line_number: 9 ]
+          [indent: 1, id: "main", classes: ["content"], line_number: 7, children: [
+              [indent: 2, smart_script: "for { arg } <- args do", line_number: 8, children: [
+                  [indent: 3, script: " arg", line_number: 9]
                 ]
               ],
-              [ indent: 2, content: "Welcome to \#{title}", line_number: 10 ]
+              [indent: 2, content: "Welcome to \#{title}", line_number: 10]
             ]
           ],
         ],
       ],
-      [ tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'", line_number: 11, children: [
-          [ indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'", line_number: 12 ],
-          [ indent: 1, tag: "script", attributes: "type=\"text/javascript\"", line_number: 13 ]
+      [tag: "section", classes: ["container"], attributes: "data-a='calliope' data-b='awesome'", line_number: 11, children: [
+          [indent: 1, tag: "img", id: "main_image", classes: ["one", "two", "three"], attributes: "src='\#{url}'", line_number: 12 ],
+          [indent: 1, tag: "script", attributes: "type=\"text/javascript\"", line_number: 13 ]
         ]
       ]
     ]
@@ -70,15 +70,15 @@ defmodule CalliopeParserTest do
     ]
 
   @parsed_with_haml_comment [
-      [ content: "foo", tag: "p", line_number: 1,children: [
-          [ smart_script: "# This would", indent: 1, line_number: 2, children: [
-              [ content: "Not be", indent: 2, line_number: 3],
-              [ content: "output", indent: 2, line_number: 4]
+      [content: "foo", tag: "p", line_number: 1, children: [
+          [smart_script: "# This would", indent: 1, line_number: 2, children: [
+              [content: "Not be", indent: 2, line_number: 3],
+              [content: "output", indent: 2, line_number: 4]
             ],
           ]
         ]
       ],
-      [ content: "bar", tag: "p", line_number: 5 ]
+      [content: "bar", tag: "p", line_number: 5]
     ]
 
   test :parse do
@@ -87,7 +87,7 @@ defmodule CalliopeParserTest do
 
   test :parse_with_special_cases do
     handle_bars = [[1, "%h1", "{{user}}"]]
-    parsed_handle_bars = [[ content: "{{user}}", tag: "h1", line_number: 1 ]]
+    parsed_handle_bars = [[content: "{{user}}", tag: "h1", line_number: 1]]
     assert parsed_handle_bars == parse handle_bars
   end
 
@@ -100,7 +100,7 @@ defmodule CalliopeParserTest do
   end
 
   test :parse_line do
-    each_token_with_index fn({ token, index }) ->
+    each_token_with_index fn({token, index}) ->
       assert parsed_tokens(index) == parsed_line_tokens(token)
     end
   end
@@ -131,12 +131,12 @@ defmodule CalliopeParserTest do
     assert_raise CalliopeException, msg, fn() ->
       parse([[1, "#main"],
              [2, "\t", "%h1", "Calliope"],
-             [3, "\t\t\t", "%h2", "Indent Too Deep" ]])
+             [3, "\t\t\t", "%h2", "Indent Too Deep"]])
     end
 
     msg = "Unknown filter on line number: 1"
     assert_raise CalliopeException, msg, fn() ->
-      parse([ [1, ":unknown"] ])
+      parse([[1, ":unknown"]])
     end
   end
 
@@ -167,13 +167,13 @@ defmodule CalliopeParserTest do
   test :hash_rocket_script_attribute_exception do
     # %script{:src => static_path(@conn, "/js/app.js")}
     tokens = [[1, "%script", "{:src => static_path(@conn, \"/js/app.js\")}"]]
-    assert_raise CalliopeException, ~r/Invalid attribute/, fn -> 
+    assert_raise CalliopeException, ~r/Invalid attribute/, fn ->
       parse(tokens)
     end
-  end 
+  end
 
   test :hash_script_exception do
-    assert_raise CalliopeException, ~r/Invalid attribute/, fn -> 
+    assert_raise CalliopeException, ~r/Invalid attribute/, fn ->
       parse([[1, ".cls", "#id", "{attr: myfunc(1,2), attr2: \"test\"}", "= one"]])
     end
   end
