@@ -30,7 +30,7 @@ defmodule CalliopeTokenizerTest do
 
   test :tokenize_inline_haml do
     inline = "%div Hello Calliope"
-    assert [[1, "%div"," Hello Calliope"]] == tokenize(inline)
+    assert [[1, "%div", " Hello Calliope"]] == tokenize(inline)
     assert [[1, "%h1", " This is \#{title}"]] == tokenize("%h1 This is \#{title}")
 
     inline = "%a{ng-click: 'doSomething()'}Click Me"
@@ -77,10 +77,10 @@ defmodule CalliopeTokenizerTest do
       tokenize("\t%a{href: \"#\"} Learning about \#{title}")
 
     # allowing spaces after the attribute values before closing curly brace
-    assert [[1, "%label", ".cl1", "{ for:  'test', class:  ' cl2' }", " Label" ]] ==
+    assert [[1, "%label", ".cl1", "{ for:  'test', class:  ' cl2' }", " Label"]] ==
       tokenize("%label.cl1{ for:  'test', class:  ' cl2' } Label")
 
-    assert [[1, "%label", "{ for: \"\#{@id}\", class: \"\#{@class}\" }", " Label" ]] ==
+    assert [[1, "%label", "{ for: \"\#{@id}\", class: \"\#{@class}\" }", " Label"]] ==
       tokenize("%label{ for: \"\#{@id}\", class: \"\#{@class}\" } Label")
   end
 

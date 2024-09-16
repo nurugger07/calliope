@@ -16,12 +16,12 @@ defmodule CalliopeSafeTest do
   test :clean do
     assert "&lt;script&rt;a bad script&lt;/script&rt;" ==
       clean "<script>a bad script</script>"
-    assert [ arg: "&lt;script&rt;a bad script &amp; more&lt;/script&rt;" ] ==
-      clean [ arg: "<script>a bad script & more</script>" ]
-    assert [ posts: [ {1, "&lt;script&rt;a bad script&lt;/script&rt;"}, {2, "ok"} ] ] ==
-      clean [ posts: [ {1, "<script>a bad script</script>"}, { 2, "ok" } ] ]
-    assert [ list: [ "&lt;script&rt;a bad script&lt;/script&rt;", "ok" ] ] ==
-      clean [ list: [ "<script>a bad script</script>", "ok" ] ]
+    assert [arg: "&lt;script&rt;a bad script &amp; more&lt;/script&rt;"] ==
+      clean [arg: "<script>a bad script & more</script>"]
+    assert [posts: [{1, "&lt;script&rt;a bad script&lt;/script&rt;"}, {2, "ok"}]] ==
+      clean [posts: [{1, "<script>a bad script</script>"}, {2, "ok"}]]
+    assert [list: ["&lt;script&rt;a bad script&lt;/script&rt;", "ok"]] ==
+      clean [list: ["<script>a bad script</script>", "ok"]]
   end
 
 end

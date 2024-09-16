@@ -1,4 +1,5 @@
 defmodule Calliope.Safe do
+  @moduledoc false
 
   @doc """
   Calliope.Safe is a utility for evaluating code and escaping HTML tag
@@ -6,11 +7,11 @@ defmodule Calliope.Safe do
   """
 
   @html_escape [
-    { "&", "&amp;"},
-    { "<", "&lt;" },
-    { ">", "&rt;" },
-    { "\"", "&quote;" },
-    { "'", "&#39;" },
+    {"&", "&amp;"},
+    {"<", "&lt;"},
+    {">", "&rt;"},
+    {"\"", "&quote;"},
+    {"'", "&#39;"},
   ]
 
   def eval_safe_script("Safe.script" <> script, args) do
@@ -21,17 +22,17 @@ defmodule Calliope.Safe do
   end
 
   def evaluate_script(args, script) do
-    { result, _ } = Code.string_to_quoted!(script) |> Code.eval_quoted(args)
+    {result, _} = Code.string_to_quoted!(script) |> Code.eval_quoted(args)
     result
   end
 
   def clean(str) when is_binary(str), do: scrub(str, @html_escape)
   def clean([]), do: []
-  def clean([{ arg, val} | t ]) when is_binary(val) do
-    [ { arg, scrub(val, @html_escape) } | clean(t) ]
+  def clean([{arg, val} | t ]) when is_binary(val) do
+    [{arg, scrub(val, @html_escape)} | clean(t)]
   end
-  def clean([{ arg, val} | t]) when is_list(val) do
-    [ { arg, scrub_list(val) } | clean(t) ]
+  def clean([{arg, val} | t]) when is_list(val) do
+    [{arg, scrub_list(val)} | clean(t)]
   end
 
   defp scrub_list([]), do: []
@@ -43,7 +44,7 @@ defmodule Calliope.Safe do
   end
 
   defp scrub(val, []), do: val
-  defp scrub(val, [{ html, escape } | t]) do
+  defp scrub(val, [{html, escape} | t]) do
     escape_string(val, html, escape) |> scrub(t)
   end
 

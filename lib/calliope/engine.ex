@@ -1,4 +1,5 @@
 defmodule Calliope.Engine do
+  @moduledoc false
 
   import Calliope.Render
 
@@ -50,8 +51,8 @@ defmodule Calliope.Engine do
 
       compile_templates unquote(path)
 
-      def layout_for(content, args\\[]) do
-        content_for unquote(layout), [ yield: content ] ++ args
+      def layout_for(content, args \\ []) do
+        content_for unquote(layout), [yield: content] ++ args
       end
 
       def content_with_layout(name, args) do
@@ -79,7 +80,7 @@ defmodule Calliope.Engine do
   def build_path_for(list), do: Enum.filter(list, fn(x) -> is_binary x end) |> Enum.join("/")
 
   def eval_path(path) do
-    { path, _ } = Code.eval_quoted path
+    {path, _} = Code.eval_quoted path
     path
   end
 
@@ -94,7 +95,7 @@ defmodule Calliope.Engine do
 
   def view_to_function([], _), do: ""
   def view_to_function([view|t], path) do
-    [ name, _, _ ] = String.split(view, ".")
+    [name, _, _] = String.split(view, ".")
 
     content = precompile_view path <> "/" <> view
 

@@ -1,4 +1,6 @@
 defmodule Calliope do
+  @moduledoc false
+
   use Calliope.Render
 
   defmacro __using__([]) do

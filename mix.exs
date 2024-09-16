@@ -24,6 +24,8 @@ defmodule Calliope.Mixfile do
 
   defp deps do
     [
+      {:credo, "~> 1.7", only: :dev},
+      {:dialyxir, "~> 1.4", only: :dev},
       {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
