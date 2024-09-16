@@ -1,6 +1,6 @@
 defmodule Calliope.Tokenizer do
 
-  @indent       ~S/(^[\t ]+)|(\/\s)|(\/\[\w+])/
+  @indent       ~s/(^[\t ]+)|(\/\s)|(\/\[\w+])/
   @tag_class_id ~S/([%.#][-:\w]+)/
   @keyword      ~S/[-:\w]+/
   @value        ~S/(?:(?:'.*?')|(?:".*?"))/
